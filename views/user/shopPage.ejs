@@ -81,6 +81,10 @@
                                         <div class="product-content-wrap">
                                             <div class="product-category">
                                                 <a href="shop-grid-right.html"><%= product.category %></a>
+                                                <a href="#"><% if (product.stock === 0) { %>
+                                                    <span class="text-danger"> (Product out of stock)</span>
+                                                   <% } %>
+                                                </a>
                                             </div>
                                             <h2><a href="/productDetails?id=<%= product._id %>"><%= product.name %></a></h2>
                                             <div class="rating-result" title="90%">
