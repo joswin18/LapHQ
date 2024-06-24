@@ -1,0 +1,112 @@
+<%- include("../partials/login.signup/header") %>
+
+
+<div class="page-header breadcrumb-wrap">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/home" rel="nofollow">Home</a>
+            <!-- <span></span> Pages -->
+            <span></span> Login
+        </div>
+    </div>
+</div>
+
+<section class="pt-100 pb-150">
+    <div class="container">
+        
+        <div class="row">
+            
+            <div class="col-lg-10 m-auto">
+                <div class="row">
+                    
+                    <div class="col-lg-5">
+                        <div style="display: flex; justify-content: center" >
+                            <% 
+                            if(typeof message !== 'undefined'){
+                                %>
+                                <p style="color: rgb(207, 1, 1); font-size: 15px; margin: 10px;"><%= message %></p>
+                                <%
+                            }    
+                            %>
+                        </div>
+                        <div class="login_wrap widget-taber-content p-30 background-white border-radius-10 mb-md-5 mb-lg-0 mb-sm-5">
+                            <div class="padding_eight_all bg-white">
+                                <div class="heading_s1">
+                                    <h3 class="mb-30">OTP Verification</h3>
+                                </div>
+                                <form method="post">
+
+                                    
+
+                                    <div class="form-group" >
+                                        <input required="" type="text" name="otp" id="otp" placeholder="enter OTP">
+                                    </div>                                    
+                                    
+                                    <div class="form-group" >
+                                        <button  type="submit" class="btn btn-fill-out btn-block hover-up " name="login">Submit</button>
+                                    </div>
+                                    <div id="otpTimer">Resend OTP in <span id="timer">60</span> seconds</div>
+                                    <button id="resendOtpBtn" disabled>Resend OTP</button>
+                                    
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+<script>
+    const timerElement = document.getElementById('timer');
+    const resendOtpBtn = document.getElementById('resendOtpBtn');
+
+    let otpTimeout = `<%= otpTimeout %>`;
+    let isResendAllowed = false;
+
+    function updateTimer() {
+        const now = Date.now();
+        const diff = otpTimeout - now;
+
+        if (diff <= 0) {
+            timerElement.textContent = '0';
+            resendOtpBtn.disabled = false;
+            isResendAllowed = true;
+        } else {
+            const seconds = Math.floor(diff / 1000);
+            timerElement.textContent = seconds;
+            resendOtpBtn.disabled = true;
+            isResendAllowed = false;
+            setTimeout(updateTimer, 1000);
+        }
+    }
+
+    updateTimer();
+
+    resendOtpBtn.addEventListener('click', () => {
+        if (isResendAllowed) {
+            // Send an AJAX request to resend the OTP
+            fetch('/resend-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reset the OTP timer
+                    otpTimeout = Date.now() + (30 * 1000); // Set the new OTP timeout
+                    resendOtpBtn.disabled = true;
+                    isResendAllowed = false;
+                    updateTimer();
+                } else {
+                    console.error('Failed to resend OTP:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    });
+</script>
+
+<%- include("../partials/login.signup/footer") %>

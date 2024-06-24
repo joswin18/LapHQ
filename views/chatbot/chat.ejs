@@ -1,0 +1,58 @@
+<!-- home.ejs -->
+<%- include("../partials/homepage/userHeader") %>
+
+<!-- ... (existing content) ... -->
+
+<!-- Chatbot interface -->
+<div class="chatbot-container">
+  <div class="chat-header">
+    <h3>Chatbot</h3>
+  </div>
+  <div class="chat-body">
+    <ul class="chat-messages"></ul>
+  </div>
+  <div class="chat-input">
+    <input type="text" placeholder="Type your message..." />
+    <button>Send</button>
+  </div>
+</div>
+
+<script>
+  const chatMessages = document.querySelector('.chat-messages');
+  const chatInput = document.querySelector('.chat-input input');
+  const sendButton = document.querySelector('.chat-input button');
+
+  sendButton.addEventListener('click', sendMessage);
+
+  function sendMessage() {
+    const message = chatInput.value.trim();
+    if (message) {
+      addMessageToChat('user', message);
+      chatInput.value = '';
+
+      fetch('/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          addMessageToChat('bot', data.answer);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+  }
+
+  function addMessageToChat(sender, message) {
+    const messageElement = document.createElement('li');
+    messageElement.classList.add(sender);
+    messageElement.textContent = message;
+    chatMessages.appendChild(messageElement);
+  }
+</script>
+
+<%- include("../partials/homepage/userFooter") %>

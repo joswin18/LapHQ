@@ -1,0 +1,91 @@
+<%- include("../partials/adminpartials/dashHeader") %>
+
+<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/admin/orderList" rel="nofollow">Back</a> 
+                <span></span> 
+            </div>
+        </div>
+    </div>
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Order Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Name: <%= order.user.name %></p> 
+                            <p>Order Number: <%= order.orderId %></p>
+                            <p>Date: <%= order.orderDate.toLocaleDateString() %></p>
+                            <p>Total: $<%= order.billTotal.toFixed(2) %></p>
+                            <p>Payment Method: <%= order.paymentMethod %></p>
+                            <p>Payment Status: <%= order.paymentStatus %></p>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Details</h5>
+                        </div>
+                        
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Image</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% order.items.forEach(item => { %>
+                                        <tr>
+                                            <td><%= item.product.name %></td>
+                                            <td><img src="/productImages/<%= item.product.defaultImg[0]%>" alt="<%= item.product.name %>" width="50"></td>
+                                            <td><%= item.quantity %></td>
+                                            <td>$<%= item.product.price.toFixed(2) %></td>
+                                            <td>$<%= item.subTotal.toFixed(2) %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="4">Subtotal</th>
+                                        <td>$<%= order.billTotal.toFixed(2) %></td>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="4">Shipping</th>
+                                        <td>$<%= order.shippingCharge.toFixed(2) %></td>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="4">Total</th>
+                                        <td>$<%= (order.billTotal + order.shippingCharge).toFixed(2) %></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Shipping Address</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><%= order.shippingAddress.addressLine1 %></p>
+                            <p><%= order.shippingAddress.addressLine2 %></p>
+                            <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.zipCode %></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<%- include("../partials/adminpartials/dashFooter") %>

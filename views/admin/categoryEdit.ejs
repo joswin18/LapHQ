@@ -1,0 +1,48 @@
+<%- include("../partials/adminpartials/dashHeader") %>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Edit Category</h2>
+            <p>Add, edit or delete a category</p>
+        </div>
+        <div>
+            <input type="text" placeholder="Search Categories" class="form-control bg-white">
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-5">
+                    <form method="post">
+                        <div>
+                            <% if (typeof error !== 'undefined') { %>
+                                <p style="color: rgb(207, 1, 1); font-size: 15px; margin: 10px;"><%= error %></p>
+                            <% } %>
+                        </div>
+                        <div class="mb-4">
+                            <label for="category_name" class="form-label">Name</label>
+                            <input name="name" type="text" placeholder="Type here" value="<%= categoryData.name %>" class="form-control" id="category_name" />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" placeholder="Type here" class="form-control" id="category_description"><%= categoryData.description %></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Edit category</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-9">
+                    <div class="table-responsive">
+                        <!-- Add your table content here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+                        <%- include("../partials/adminpartials/dashFooter") %>

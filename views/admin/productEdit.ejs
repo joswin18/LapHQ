@@ -1,0 +1,158 @@
+<%- include("../partials/adminpartials/dashHeader") %>
+
+<style>
+    .image-container {
+        display: inline-block;
+        margin: 10px;
+        position: relative;
+    }
+    .image-container img {
+        max-width: 200px;
+        max-height: 200px;
+    }
+    .image-container .delete-image {
+        position: absolute;
+        top: 4px;
+        right: 5px;
+        background: red;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+</style>
+
+    <section class="content-main">
+        <% if (typeof error !== 'undefined') { %>
+            <div class="alert alert-danger"><%= error %></div>
+        <% } %>
+        <div class="row">
+            <form action="/admin/updateProduct" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="id" value="<%= productData._id %>">
+                <div class="col-9">
+                    <div class="content-header">
+                        <h2 class="content-title">Edit Product Details</h2>
+                        <div>
+                            <button type="button" class="btn btn-light rounded font-sm mr-5 text-body hover-up">Save to draft</button>
+                            <button type="submit" class="btn btn-md rounded font-sm hover-up">Publish</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Details</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <label for="product_name" class="form-label">Product title</label>
+                                <input name="name" type="text" value="<%= productData.name %>" class="form-control" id="product_name" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="stock" class="form-label">stocks</label>
+                                <input name="stock" type="text" placeholder="stocks available" value="<%= productData.stock %>" class="form-control"
+                                    id="stock" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="brand_name" class="form-label">Brand</label>
+                                <input name="brandName" type="text" value="<%= productData.brandName %>" class="form-control" id="brand_name" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Full description</label>
+                                <textarea name="description" class="form-control" rows="4" required><%= productData.description %></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-4">
+                                    <div class="mb-4">
+                                        <label class="form-label">Offer price</label>
+                                        <div class="row gx-2">
+                                            <input name="price" value="<%= productData.price %>" type="text" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="mb-4">
+                                        <label class="form-label">Regular price</label>
+                                        <input name="oldPrice" value="<%= productData.oldPrice %>" type="text" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Media</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-upload">
+                                <div id="imagePreview">
+                                    <% productData.defaultImg.forEach(img => { %>
+                                        <div class="image-container">
+                                            <img src="/productImages/<%= img %>" alt="Product Image">
+                                            <button type="button" class="delete-image">x</button>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                                <input name="image" id="productImages" class="form-control" type="file" multiple>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>Organization</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row gx-2">
+                                <div class="col-sm-6 mb-3">
+                                    <label class="form-label">Category</label>
+                                    <select name="category" class="form-select">
+                                        <% categoryData.forEach(category => { %>
+                                            <option value="<%= category.name %>" <%= productData.category === category.name ? 'selected' : '' %>><%= category.name %></option>
+                                        <% }) %>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            
+        </div>
+    </section>
+
+    <script>
+        document.getElementById('productImages').addEventListener('change', function(event) {
+            const imagePreview = document.getElementById('imagePreview');
+            imagePreview.innerHTML = ''; // Clear previous images
+
+            Array.from(event.target.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.classList.add('image-container');
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = file.name;
+                    
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.classList.add('delete-image');
+                    button.innerText = 'x';
+                    button.addEventListener('click', function() {
+                        div.remove();
+                    });
+                    
+                    div.appendChild(img);
+                    div.appendChild(button);
+                    imagePreview.appendChild(div);
+                }
+                reader.readAsDataURL(file);
+            });
+        });
+
+    </script>
+
+
+    <%- include("../partials/adminpartials/dashFooter") %>

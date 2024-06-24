@@ -1,0 +1,173 @@
+<%- include("../partials/adminpartials/dashHeader") %>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Order List </h2>
+            <p>Lorem ipsum dolor sit amet.</p>
+        </div>
+        <div>
+            <input type="text" placeholder="Search order ID" class="form-control bg-white">
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <input type="text" placeholder="Search..." class="form-control">
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Status</option>
+                        <option>Active</option>
+                        <option>Disabled</option>
+                        <option>Show all</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Show 20</option>
+                        <option>Show 30</option>
+                        <option>Show 40</option>
+                    </select>
+                </div>
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        
+                        <tr>
+                            <th>#ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Date</th>
+                            <th scope="col" class="text-end"> Action </th>
+                        </tr>
+                    </thead>
+                    <% if (orderData && orderData.length > 0) { %>
+                        <% orderData.forEach(order => { %>
+                    
+                    
+                    
+                    <tbody>
+                        
+                        
+                        <tr>
+                            <td><%= order.orderId %></td>
+                            <td><b><%= order.user.name %></b></td>
+                            <td><%= order.user.email %></td>
+                            <td>$<%= order.billTotal %></td>
+                            <td>
+                                <% if (order.orderStatus === 'Pending') { %>
+                                    <span class="badge rounded-pill alert-warning"><%= order.orderStatus %></span>
+                                <% } else if (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') { %>
+                                    <span class="badge rounded-pill alert-success"><%= order.orderStatus %></span>
+                                <% } else if (order.orderStatus === 'Cancelled') { %>
+                                    <span class="badge rounded-pill alert-danger"><%= order.orderStatus %></span>
+                                <% } else { %>
+                                    <span class="badge rounded-pill"><%= order.orderStatus %></span>
+                                <% } %>
+                            </td>
+                            <td><%= order.orderDate.toLocaleDateString() %></td>
+                            <td class="text-end">
+                                <a href="/admin/orderDetails?orderId=<%= order.orderId %>" class="btn btn-md rounded font-sm">Detail</a>
+                                <div class="dropdown">
+                                    <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="/admin/orderDetails?orderId=<%= order.orderId %>">View detail</a>
+                                        <% if (order.orderStatus === 'Delivered') { %>
+                                        <% } else { %>
+                                            <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editOrderModal<%= order._id %>" onclick="showEditModal('<%= order._id %>')">Edit info</a>
+                                        <% } %>
+                                        <a class="dropdown-item text-danger" href="#">Delete</a>
+                                    </div>
+                                </div> <!-- dropdown //end -->
+                            </td>
+                    </tbody>
+                    
+                    <% }); %>
+                        <% } else { %>
+                            <p>No orders found.</p>
+                        <% } %>
+                </table>
+            </div> <!-- table-responsive //end -->
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                <li class="page-item"><a class="page-link" href="#">02</a></li>
+                <li class="page-item"><a class="page-link" href="#">03</a></li>
+                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                <li class="page-item"><a class="page-link" href="#">16</a></li>
+                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+            </ul>
+        </nav>
+    </div>
+</section> 
+
+<!-- modal -->
+<% orderData.forEach(order => { %>
+    <div class="modal fade" id="editOrderModal<%= order._id %>" tabindex="-1" aria-labelledby="editOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editOrderModalLabel">Edit Order Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editOrderForm<%= order._id %>">
+                        <div class="mb-3">
+                            <label for="orderStatus<%= order._id %>" class="form-label">Order Status</label>
+                            <select class="form-select" id="orderStatus<%= order._id %>" name="orderStatus">
+                                <option value="Pending" <%= order.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                <option value="Returned" <%= order.orderStatus === 'Returned' ? 'selected' : '' %>>Returned</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="updateOrderStatus('<%= order._id %>')">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<% }); %>
+
+<script>
+    function updateOrderStatus(orderId) {
+        const orderStatusSelect = document.getElementById(`orderStatus${orderId}`);
+        const newOrderStatus = orderStatusSelect.value;
+
+        
+        fetch('/admin/updateOrderStatus', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ orderId, orderStatus: newOrderStatus })
+        })
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                console.error('Error updating order status');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+
+
+<%- include("../partials/adminpartials/dashFooter") %>

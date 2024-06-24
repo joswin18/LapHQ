@@ -1,0 +1,337 @@
+{
+  "settings": {
+    "languages": [
+      "en"
+    ],
+    "forceNER": true
+  },
+  "nluManager": {
+    "settings": {},
+    "languages": [
+      "en"
+    ],
+    "intentDomains": {},
+    "domainManagers": {
+      "en": {
+        "settings": {
+          "language": "en",
+          "useNoneFeature": true,
+          "config": {
+            "activation": "leaky-relu",
+            "hiddenLayers": [],
+            "iterations": 20000,
+            "learningRate": 0.7,
+            "errorThresh": 0.00005,
+            "momentum": 0.5,
+            "deltaErrorThresh": 0.000001,
+            "maxDecimals": 9,
+            "leakyReluAlpha": 0.08,
+            "timeout": 120000
+          }
+        },
+        "language": "en",
+        "nluClassName": "BrainNLU",
+        "useMasterDomain": true,
+        "trainByDomain": false,
+        "keepStopwords": true,
+        "stemDict": {
+          "hello": {
+            "domain": "default",
+            "intent": "greeting"
+          },
+          "hi": {
+            "domain": "default",
+            "intent": "greeting"
+          },
+          "is,name,what,your": {
+            "domain": "default",
+            "intent": "name.query"
+          },
+          "is,like,the,weather,what": {
+            "domain": "default",
+            "intent": "weather.query"
+          }
+        },
+        "intentDict": {
+          "greeting": "default",
+          "name.query": "default",
+          "weather.query": "default"
+        },
+        "useStemDict": true,
+        "domains": {
+          "master_domain": {
+            "settings": {
+              "language": "en",
+              "useNoneFeature": true,
+              "config": {
+                "activation": "leaky-relu",
+                "hiddenLayers": [],
+                "iterations": 20000,
+                "learningRate": 0.7,
+                "errorThresh": 0.00005,
+                "momentum": 0.5,
+                "deltaErrorThresh": 0.000001,
+                "maxDecimals": 9,
+                "leakyReluAlpha": 0.08,
+                "timeout": 120000
+              }
+            },
+            "language": "en",
+            "keepStopwords": "en",
+            "docs": [
+              {
+                "intent": "greeting",
+                "tokens": [
+                  "hi"
+                ]
+              },
+              {
+                "intent": "name.query",
+                "tokens": [
+                  "what",
+                  "is",
+                  "your",
+                  "name"
+                ]
+              },
+              {
+                "intent": "weather.query",
+                "tokens": [
+                  "what",
+                  "is",
+                  "the",
+                  "weather",
+                  "like"
+                ]
+              },
+              {
+                "intent": "greeting",
+                "tokens": [
+                  "hi"
+                ]
+              },
+              {
+                "intent": "name.query",
+                "tokens": [
+                  "what",
+                  "is",
+                  "your",
+                  "name"
+                ]
+              },
+              {
+                "intent": "weather.query",
+                "tokens": [
+                  "what",
+                  "is",
+                  "the",
+                  "weather",
+                  "like"
+                ]
+              }
+            ],
+            "features": {
+              "hi": 2,
+              "what": 4,
+              "is": 4,
+              "your": 2,
+              "name": 2,
+              "the": 2,
+              "weather": 2,
+              "like": 2
+            },
+            "isEditing": false,
+            "className": "BrainNLU",
+            "classifier": {
+              "className": "BrainClassifier",
+              "settings": {
+                "language": "en",
+                "useNoneFeature": true,
+                "config": {
+                  "activation": "leaky-relu",
+                  "hiddenLayers": [],
+                  "iterations": 20000,
+                  "learningRate": 0.7,
+                  "errorThresh": 0.00005,
+                  "momentum": 0.5,
+                  "deltaErrorThresh": 0.000001,
+                  "maxDecimals": 9,
+                  "leakyReluAlpha": 0.08,
+                  "timeout": 120000
+                }
+              },
+              "labels": [],
+              "network": {
+                "sizes": [
+                  9,
+                  4
+                ],
+                "layers": [
+                  {
+                    "hi": {},
+                    "what": {},
+                    "is": {},
+                    "your": {},
+                    "name": {},
+                    "the": {},
+                    "weather": {},
+                    "like": {},
+                    "nonefeature": {}
+                  },
+                  {
+                    "greeting": {
+                      "bias": 2.907727132,
+                      "weights": {
+                        "hi": 9.547449112,
+                        "what": -0.960248053,
+                        "is": -0.960248053,
+                        "your": -0.574490547,
+                        "name": -0.574490547,
+                        "the": -0.385757506,
+                        "weather": -0.385757506,
+                        "like": -0.385757506,
+                        "nonefeature": -2.763574839
+                      }
+                    },
+                    "name.query": {
+                      "bias": 0.539398616,
+                      "weights": {
+                        "hi": -0.563964725,
+                        "what": 2.173219442,
+                        "is": 2.173219442,
+                        "your": 3.806710243,
+                        "name": 3.806710243,
+                        "the": -1.633491158,
+                        "weather": -1.633491158,
+                        "like": -1.633491158,
+                        "nonefeature": -0.529789209
+                      }
+                    },
+                    "weather.query": {
+                      "bias": 0.358128858,
+                      "weights": {
+                        "hi": -0.378999144,
+                        "what": 1.449159503,
+                        "is": 1.449159503,
+                        "your": -1.631926775,
+                        "name": -1.631926775,
+                        "the": 3.081087589,
+                        "weather": 3.081087589,
+                        "like": 3.081087589,
+                        "nonefeature": -0.353584051
+                      }
+                    },
+                    "None": {
+                      "bias": 2.848128211,
+                      "weights": {
+                        "hi": -2.747347116,
+                        "what": -0.883768022,
+                        "is": -0.883768022,
+                        "your": -0.529794872,
+                        "name": -0.529794872,
+                        "the": -0.35397315,
+                        "weather": -0.35397315,
+                        "like": -0.35397315,
+                        "nonefeature": 9.307566643
+                      }
+                    }
+                  }
+                ],
+                "trainOpts": {
+                  "iterations": 20000,
+                  "errorThresh": 0.00005,
+                  "fixedError": false,
+                  "deltaErrorThresh": 0.000001,
+                  "learningRate": 0.7,
+                  "momentum": 0.5,
+                  "leakyReluAlpha": 0.08,
+                  "maxDecimals": 9,
+                  "log": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "extraSentences": [
+      [
+        "en",
+        "Hello"
+      ],
+      [
+        "en",
+        "Hi"
+      ],
+      [
+        "en",
+        "What is your name?"
+      ],
+      [
+        "en",
+        "What is the weather like?"
+      ],
+      [
+        "en",
+        "Hello"
+      ],
+      [
+        "en",
+        "Hi"
+      ],
+      [
+        "en",
+        "What is your name?"
+      ],
+      [
+        "en",
+        "What is the weather like?"
+      ]
+    ]
+  },
+  "nerManager": {
+    "settings": {},
+    "threshold": 0.8,
+    "builtins": [
+      "Number",
+      "Ordinal",
+      "Percentage",
+      "Age",
+      "Currency",
+      "Dimension",
+      "Temperature",
+      "DateTime",
+      "PhoneNumber",
+      "IpAddress",
+      "Boolean",
+      "Email",
+      "Hashtag",
+      "URL"
+    ],
+    "namedEntities": {}
+  },
+  "slotManager": {},
+  "responses": {
+    "en": {
+      "greeting": [
+        {
+          "response": "Hello there!"
+        }
+      ],
+      "name.query": [
+        {
+          "response": "My name is Claude."
+        }
+      ],
+      "weather.query": [
+        {
+          "response": "I don't actually know the weather, but I can try to find that information for you."
+        }
+      ]
+    }
+  },
+  "actions": {},
+  "utteranceDict": {
+    "?": "help"
+  }
+}

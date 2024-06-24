@@ -1,0 +1,222 @@
+<%- include("../partials/homepage/userHeader") %>
+
+<main class="main">
+    <section class="home-slider position-relative mb-30">
+        <div class="container">
+            <div class="home-slide-cover bg-grey-10 mt-30">
+                <div class="hero-slider-1 style-4 dot-style-1 dot-style-1-position-1">
+                    <div class="single-hero-slider single-animation-wrap">
+                        <div class="container">
+                            <div class="row align-items-center slider-animated-1">
+                                <div class="col-lg-5 col-md-6">
+                                    <div class="hero-slider-content-2">
+                                        <h4 class="animated">Trade-In Offer</h4>
+                                        <h3 class="animated fw-900">Supper Value Deals</h3>
+                                        <h2 class="animated fw-900 text-brand">On All Products</h2>
+                                        <p class="animated">Save more with coupons & up to 70% off</p>
+                                        <a class="animated btn btn-brush btn-brush-3" href="shop-product-right.html" tabindex="0"> Shop Now </a>
+                                    </div>
+                                </div>
+                                <!-- <div class="col-lg-7 col-md-6">
+                                    <div class="single-slider-img single-slider-img-1">
+                                        <img class="animated" src="assets/imgs/slider/slider-6.png" alt="">
+                                    </div>
+                                </div> -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="single-hero-slider single-animation-wrap">
+                        <div class="container">
+                            <div class="row align-items-center slider-animated-1">
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="hero-slider-content-2">
+                                        <h3 class="animated fw-900 text-brand">Laptops for Every Need</h3>
+                                        <p class="animated">Find the perfect laptop for work, gaming, or entertainment.</p>
+                                        <a class="animated btn btn-brush btn-brush-3" href="shop-product-right.html" tabindex="0"> Shop Now </a>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-md-6">
+                                    <div class="single-slider-img single-slider-img-1">
+                                        <img class="animated" src="assets/imgs/slider/laptop-slider.png" alt="">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="slider-arrow hero-slider-1-arrow"></div>
+            </div>
+        </div>
+    </section>
+<!-- fefef -->
+    <section class="product-tabs pt-25 pb-20 wow fadeIn animated">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <div class="widget-category mb-30">
+                        <h5 class="section-title style-1 mb-30 wow fadeIn animated">Categories</h5>
+                        <ul class="categories">
+                            <li><a href="shop-grid-right.html">Ultrabooks</a></li>
+                            <li><a href="shop-grid-right.html">Gaming Laptops</a></li>
+                            <li><a href="shop-grid-right.html">Business Laptops</a></li>
+                            <li><a href="shop-grid-right.html">Student Laptops</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-9">
+                    <div class="tab-header">
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="nav-tab-one" data-bs-toggle="tab" data-bs-target="#tab-one" type="button" role="tab" aria-controls="tab-one" aria-selected="true">Featured</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="nav-tab-two" data-bs-toggle="tab" data-bs-target="#tab-two" type="button" role="tab" aria-controls="tab-two" aria-selected="false">Best Sellers</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--End nav-tabs-->
+                    <div class="tab-content wow fadeIn animated" id="myTabContent">
+                        <!-- Featured Products -->
+                        <div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
+                            <div class="row product-grid-4">
+                                <% featuredProducts.forEach(product => { %>
+                                    <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+                                        <div class="product-cart-wrap mb-30">
+                                            <div class="product-img-action-wrap">
+                                                <div class="product-img product-img-zoom">
+                                                    <a href="/productDetails?id=<%= product._id %>">
+                                                        <img class="default-img" src="/productImages/<%= product.defaultImg[0] %>" alt="">
+                                                        <img class="hover-img" src="/productImages/<%= product.hoverImg %>" alt="">
+                                                    </a>
+                                                </div>
+                                                <div class="product-action-1">
+                                                    <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal"><i class="fi-rs-eye"></i></a>
+                                                    <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                    <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
+                                                </div>
+                                                <div class="product-badges product-badges-position product-badges-mrg">
+                                                    <span class="hot">Hot</span>
+                                                </div>
+                                            </div>
+                                            <div class="product-content-wrap">
+                                                <div class="product-category">
+                                                    <a href="shop-grid-right.html"><%= product.category %></a>
+                                                    <a href="#"><% if (product.stock === 0) { %>
+                                                     <span class="text-danger"> (Product out stock)</span>
+                                                    <% } %></a>
+                                                </div>
+                                                <h2><a href="/productDetails?id=<%= product._id %>"><%= product.name %></a></h2>
+                                                <div class="rating-result" title="90%">
+                                                    <span>
+                                                        <span><%= product.discountPercentage %>%</span>
+                                                    </span>
+                                                </div>
+                                                <div class="product-price">
+                                                    <span>$<%= product.price %></span>
+                                                    <span class="old-price">$<%= product.oldPrice %></span>
+                                                </div>
+                                                <div class="product-action-1 show">
+                                                    <a aria-label="Add To Cart" class="action-btn hover-up" onclick="addToCart('<%= product._id %>')"><i class="fi-rs-shopping-bag-add"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                        <!-- Best Sellers -->
+                        <div class="tab-pane fade" id="tab-two" role="tabpanel" aria-labelledby="tab-two">
+                            <div class="row product-grid-4">
+                                <% bestSellers.forEach(product => { %>
+                                    <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+                                        <div class="product-cart-wrap mb-30">
+                                            <div class="product-img-action-wrap">
+                                                <div class="product-img product-img-zoom">
+                                                    <a href="/productDetails/<%= product._id %>">
+                                                        <img class="default-img" src="/productImages/<%= product.defaultImg %>" alt="">
+                                                        <img class="hover-img" src="/productImages/<%= product.hoverImg %>" alt="">
+                                                    </a>
+                                                </div>
+                                                <div class="product-action-1">
+                                                    <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal"><i class="fi-rs-eye"></i></a>
+                                                    <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                    <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
+                                                </div>
+                                                <div class="product-badges product-badges-position product-badges-mrg">
+                                                    <span class="best">Best Sell</span>
+                                                </div>
+                                            </div>
+                                            <div class="product-content-wrap">
+                                                <div class="product-category">
+                                                    <a href="shop-grid-right.html"><%= product.category %></a>
+                                                </div>
+                                                <h2><a href="/productDetails/<%= product._id %>"><%= product.name %></a></h2>
+                                                <div class="rating-result" title="95%">
+                                                    <span>
+                                                        <span>95%</span>
+                                                    </span>
+                                                </div>
+                                                <div class="product-price">
+                                                    <span>$<%= product.price %></span>
+                                                    <span class="old-price">$<%= product.oldPrice %></span>
+                                                </div>
+                                                <div class="product-action-1 show">
+                                                    <a aria-label="Add To Cart" class="action-btn hover-up" href="shop-cart.html"><i class="fi-rs-shopping-bag-add"></i></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!--End tab-content-->
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function addToCart(productId) {
+        fetch('/add-to-cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                productId
+            }),
+        })
+        .then(data => {
+            if (data.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Product Added to Cart',
+                    text: data.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: data.message,
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!',
+            });
+        });
+    } 
+</script>
+
+<%- include("../partials/homepage/userFooter") %>

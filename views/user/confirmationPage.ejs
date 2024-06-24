@@ -1,0 +1,150 @@
+<%- include("../partials/homepage/userHeader") %>
+
+<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" rel="nofollow">Home</a>
+                <span></span> Order Confirmation
+            </div>
+        </div>
+    </div>
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Thank you. Your order has been received.</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>Order Number: <%= order.orderId %></p>
+                            <p>Date: <%= order.orderDate.toLocaleDateString() %></p>
+                            <p>Total: $<%= order.billTotal.toFixed(2) %></p>
+                            <p>Payment Method: <%= order.paymentMethod %></p>
+                            <p>Payment Status: <%= order.paymentStatus %></p>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Order Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Image</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% order.items.forEach(item => { %>
+                                        <tr>
+                                            <td><%= item.product.name %></td>
+                                            <td><img src="/productImages/<%= item.product.defaultImg[0]%>" alt="<%= item.product.name %>" width="50"></td>
+                                            <td><%= item.quantity %></td>
+                                            <td>$<%= item.product.price.toFixed(2) %></td>
+                                            <td>$<%= item.subTotal.toFixed(2) %></td>
+                                        </tr>
+                                    <% }); %>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="4">Subtotal</th>
+                                        <td>$<%= order.billTotal.toFixed(2) %></td>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="4">Shipping</th>
+                                        <td>$<%= order.shippingCharge.toFixed(2) %></td>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="4">Total</th>
+                                        <td>$<%= (order.billTotal + order.shippingCharge).toFixed(2) %></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">Shipping Address</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><%= order.shippingAddress.addressLine1 %></p>
+                            <p><%= order.shippingAddress.addressLine2 %></p>
+                            <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.zipCode %></p>
+                        </div>
+                    </div>
+                    <% if (order.orderStatus === 'Delivered' ||order.orderStatus === 'Cancelled') { %>
+                     
+                    
+                    <% } else { %>
+                    <div class="col-12 mt-3">
+                        <button type="button" style="background-color: rgba(190, 2, 2, 0.585); border-color:rgba(170, 0, 0, 0);" class="btn" data-bs-toggle="modal" data-bs-target="#cancelOrder<%= order._id %>">
+                            Cancel Order
+                        </button>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<div class="modal fade" id="cancelOrder<%= order._id %>" tabindex="-1" aria-labelledby="editOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger" id="editOrderModalLabel">Order Cancellation</h5>
+            </div>
+            <div class="modal-body">
+                <h6>Do you want to Canel the Order</h6>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn" style="background-color: rgba(190, 2, 2, 0.585); border-color:rgba(170, 0, 0, 0);" onclick="cancelOrder('<%= order._id %>')">Cancel</button>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function cancelOrder(orderId){
+        fetch('/cancel-order',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ orderId})
+        }).then((resolve)=>{
+            console.log(resolve)
+            if(resolve){
+                Swal.fire({
+                    icon: 'success',
+                    title: 'order cancelled',
+                    text: 'order cancelled successfully',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+                .then(()=>{
+                    window.location.href = '/account'
+                })
+                
+            }else{
+                console.log('error cancelling the order')
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+</script>
+
+
+<%- include("../partials/homepage/userFooter") %>
