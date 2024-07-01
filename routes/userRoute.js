@@ -3,6 +3,7 @@ const userRoute = express.Router();
 const userController = require("../controller/userController");
 const cartController = require("../controller/cartController");
 const orderController = require("../controller/orderController");
+const wishlistController = require("../controller/wishlistController");
 const session = require('express-session')
 
 let config = require('../config/config')
@@ -71,4 +72,10 @@ userRoute.post('/add-address',orderController.addAddress)
 userRoute.post('/place-order',orderController.placeOrder)
 userRoute.get('/order-confirmation',auth.is_login,orderController.loadConfirmation)
 userRoute.post('/cancel-order',userController.cancelOrder)
+userRoute.post('/verify-order',orderController.verifyPayment)
+
+userRoute.get('/wishlist',auth.is_login,wishlistController.loadWishlist)
+//wishlist 
+userRoute.post('/add-to-wishlist',wishlistController.addToWishlist)
+userRoute.post('/remove-from-wishlist',wishlistController.removeFromWishlist);
 module.exports = userRoute;

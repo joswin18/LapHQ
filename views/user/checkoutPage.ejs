@@ -198,6 +198,10 @@
                                         <p class="text-muted mt-5">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration. </p>
                                     </div>
                                 </div>
+                                <div class="custome-radio">
+                                    <input class="form-check-input" required="" type="radio" name="payment_option" id="razorpayRadio" value="Razorpay">
+                                    <label class="form-check-label" for="razorpayRadio">Razorpay</label>
+                                </div>
                                 <!-- <div class="custome-radio">
                                     <input class="form-check-input" required="" type="radio" name="payment_option" id="exampleRadios4" checked="">
                                     <label class="form-check-label" for="exampleRadios4" data-bs-toggle="collapse" data-target="#checkPayment" aria-controls="checkPayment">Check Payment</label>
@@ -222,7 +226,7 @@
     </section>
 </main>
 
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script>
@@ -232,7 +236,6 @@ placeOrderBtn.addEventListener('click', async function() {
     const differentAddress = document.getElementById('differentaddress').checked;
 
     if (differentAddress) {
-        
         addressData = {
             addressType: document.getElementById('addressType').value,
             addressLine1: document.getElementById('addressLine1').value,
@@ -256,27 +259,83 @@ placeOrderBtn.addEventListener('click', async function() {
         return;
     }
 
-    const orderData = {
-        address: addressData,
-        paymentOption: selectedPayment.value,
-        newAddress: differentAddress
-    };
+    if (selectedPayment.value === 'Razorpay') {
 
-    const response = await fetch('/place-order', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(orderData)
-    });
+        const response = await fetch('/place-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                address: addressData,
+                paymentOption: 'Razorpay',
+                newAddress: differentAddress
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const options = {
+                "key": "rzp_test_xaGkIpXmOWb28y",
+                "amount": data.amount,
+                "currency": "INR",
+                "name": "Your Company Name",
+                "description": "Test Transaction",
+                "order_id": data.razorpayOrderId, 
+                "handler": function (response) {
+                    
+                    fetch('/verify-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({response,
+                            orderId:data.orderId})
+                    }).then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = "/order-confirmation?orderId=" + data.orderId;
+                        } else {
+                            Swal.fire('Payment Failed', data.message, 'error');
+                        }
+                    });
+                },
+                "prefill": {
+                    "name": "<%= userData.name %>",
+                    "email": "<%= userData.email %>",
+                    "contact": "<%= userData.phone %>"
+                },
+                "theme": {
+                    "color": "#F37254"
+                }
+            };
+            const rzp1 = new Razorpay(options);
+            rzp1.open();
+        } else {
+            Swal.fire('Error', data.message, 'error');
+        }
+    } else {
+        const orderData = {
+            address: addressData,
+            paymentOption: selectedPayment.value,
+            newAddress: differentAddress
+        };
 
-    const result = await response.json();
-    if (result.success) {
-        const productDetailsHtml = result.products.map(product => 
-                `<p>${product.name} - Qty: ${product.quantity} - Price: $${product.price.toFixed(2)}</p>`
-            ).join('');
+        const response = await fetch('/place-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        });
 
-            
+        const result = await response.json();
+        if (result.success) {
+            const productDetailsHtml = result.products.map(product => 
+                    `<p>${product.name} - Qty: ${product.quantity} - Price: $${product.price.toFixed(2)}</p>`
+                ).join('');
+
             await Swal.fire({
                 icon: 'success',
                 title: 'Order Placed Successfully!',
@@ -288,9 +347,10 @@ placeOrderBtn.addEventListener('click', async function() {
                 `,
                 confirmButtonText: 'View Order Details'
             });
-        window.location.href = '/order-confirmation?orderId=' + result.orderId;
-    } else {
-        alert('Error placing order: ' + result.message);
+            window.location.href = '/order-confirmation?orderId=' + result.orderId;
+        } else {
+            alert('Error placing order: ' + result.message);
+        }
     }
 });
 

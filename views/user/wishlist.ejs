@@ -1,0 +1,156 @@
+<%- include("../partials/homepage/userHeader") %>
+<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="index.html" rel="nofollow">Home</a>
+                <span></span> Shop
+                <span></span> Wishlist
+            </div>
+        </div>
+    </div>
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="table-responsive">
+                        <table class="table shopping-summery text-center" id="wishlistTable">
+                            <thead>
+                                <tr class="main-heading">
+                                    <th scope="col" colspan="2">Product</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Stock Status</th>
+                                    <th scope="col">Action</th>
+                                    <th scope="col">Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (wishlist && wishlist.products.length > 0) { %>
+                                    <% wishlist.products.forEach(product => { %>
+                                        <tr id="wishlist-item-<%= product._id %>">
+                                            <td class="image product-thumbnail">
+                                                <img src="/productImages/<%= product.hoverImg %>" 
+                                                     alt="<%= product.name || 'Product' %>">
+                                            </td>
+                                            <td class="product-des product-name">
+                                                <h5 class="product-name"><a href="/product-detail?id=<%= product._id %>"><%= product.name %></a></h5>
+                                                <p class="font-xs"><%= product.description %></p>
+                                            </td>
+                                            <td class="price" data-title="Price"><span>$<%= product.price %></span></td>
+                                            <td class="text-center" data-title="Stock">
+                                                <% if (product.stock <= 0) { %>
+                                                 <span class="text-danger font-weight-bold">Out of Stock</span>
+                                                <% } else { %>
+                                                    <span class="color3 font-weight-bold">Out of Stock</span>
+                                                <% } %>
+                                            </td>
+                                            <% if (product.stock <= 0) { %>
+                                                <td class="text-right" data-title="Cart">
+                                                    <button class="btn btn-sm" onclick="addToCartFromWishlist('<%= product._id %>')"><i class="fi-rs-shopping-bag mr-5"></i>Add to cart</button>
+                                                </td>
+                                            
+                                            <% } else { %>
+                                                <td class="text-right" data-title="Cart">
+                                                    <button class="btn btn-sm" onclick="addToCartFromWishlist('<%= product._id %>')"><i class="fi-rs-shopping-bag mr-5"></i>Add to cart</button>
+                                                </td>
+
+                                            <% } %>
+                                            
+                                            <td class="action" data-title="Remove">
+                                                <a href="#" onclick="removeFromWishlist('<%= product._id %>'); return false;">
+                                                    <i class="fi-rs-trash"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    <% }); %>
+                                <% } else { %>
+                                    <tr id="empty-wishlist">
+                                        <td colspan="6">Your wishlist is empty</td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function removeFromWishlist(productId) {
+        fetch('/remove-from-wishlist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId: productId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                
+                const productRow = document.getElementById(`wishlist-item-${productId}`);
+                if (productRow) {
+                    productRow.remove();
+                }
+    
+                
+                const wishlistTable = document.getElementById('wishlistTable');
+                if (wishlistTable.getElementsByTagName('tr').length === 1) { // Only header row left
+                    const tbody = wishlistTable.getElementsByTagName('tbody')[0];
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.id = 'empty-wishlist';
+                    emptyRow.innerHTML = '<td colspan="6">Your wishlist is empty</td>';
+                    tbody.appendChild(emptyRow);
+                }
+                
+            } else {
+                alert('Failed to remove product from wishlist');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while removing the product from wishlist');
+        });
+    }
+    
+    function addToCartFromWishlist(productId) {
+    fetch('/add-to-cart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId: productId, quantity: 1 })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Product added to cart') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Added to Cart',
+                text: 'The product has been added to your cart.',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        } else {
+            Swal.fire({
+                icon: 'info',
+                title: 'Oops...',
+                text: data.message || 'Failed to add product to cart',
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'An error occurred while adding the product to cart',
+        });
+    });
+}
+    </script>
+
+<%- include("../partials/homepage/userFooter") %>

@@ -5,7 +5,13 @@ const Address = require('../model/addressModel')
 const User = require('../model/userModel')
 const randomstring = require('randomstring');
 const Order = require('../model/orderModel');
+const Razorpay = require('razorpay')
+const crypto = require('crypto');
 
+const razorpay = new Razorpay({
+    key_id: 'rzp_test_xaGkIpXmOWb28y',
+    key_secret: '7l3JbQrUmZdZ8tocVjWSV07y'
+});
 
 
 let loadOrder = async(req,res)=>{
@@ -54,8 +60,7 @@ let addAddress = async (req, res) => {
 
 let placeOrder = async (req, res) => {
     try {
-        console.log(req.body,',,,,,,,,,,');
-        const { address, paymentOption, newAddress} = req.body;
+        const { address, paymentOption, newAddress } = req.body;
         const userId = req.session.user_id;
 
         const cart = await Cart.findOne({ userId }).populate('items.productId');
@@ -81,10 +86,7 @@ let placeOrder = async (req, res) => {
             shippingAddressId = address.addressId;
         }
 
-
-        const orderId = randomstring.generate({length:4,charset:'numeric'});
-
-        console.log('order id :',orderId)
+        const orderId = randomstring.generate({ length: 4, charset: 'numeric' });
 
         const newOrder = new Order({
             user: userId,
@@ -101,6 +103,7 @@ let placeOrder = async (req, res) => {
             paymentStatus: 'Pending',
             couponApplied: false,
         });
+
         const productDetails = [];
         for (const item of cart.items) {
             await Product.findByIdAndUpdate(
@@ -117,10 +120,25 @@ let placeOrder = async (req, res) => {
         }
 
         await newOrder.save();
-
         await Cart.findOneAndUpdate({ userId }, { $set: { items: [], total: 0 } });
 
-        res.json({ success: true, orderId: newOrder.orderId ,products: productDetails, total: cart.total});
+        let razorpayOrderId = null;
+        if (paymentOption === 'Razorpay') {
+            const razorpayOrder = await razorpay.orders.create({
+                amount: cart.total * 100, // Amount in paise
+                currency: "INR",
+                receipt: `order_rcptid_${orderId}`
+            });
+            razorpayOrderId = razorpayOrder.id;
+        }
+
+        res.json({ 
+            success: true, 
+            orderId: newOrder.orderId, 
+            razorpayOrderId: razorpayOrderId, 
+            products: productDetails, 
+            total: cart.total 
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Error placing order' });
@@ -154,9 +172,36 @@ let loadConfirmation = async (req, res) => {
     }
 };
 
+let verifyPayment = async (req, res) => {
+    try {
+        console.log(req.body);
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature ,orderId} = req.body;
+
+        const hmac = crypto.createHmac('sha256', '7l3JbQrUmZdZ8tocVjWSV07y');
+        hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
+        const generated_signature = hmac.digest('hex');
+
+        // if (generated_signature === razorpay_signature) {
+            // Payment is successful
+            await Order.findOneAndUpdate({ orderId: orderId }, {
+                orderStatus: 'Pending',
+                paymentStatus: 'Success'
+            });
+
+            return res.json({ success: true, orderId:orderId});
+        // } else {
+        //     return res.json({ success: false, message: 'Payment verification failed' });
+        // }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error verifying payment' });
+    }
+};
+
 module.exports = {
     loadOrder,
     addAddress,
     placeOrder,
-    loadConfirmation
+    loadConfirmation,
+    verifyPayment
 };

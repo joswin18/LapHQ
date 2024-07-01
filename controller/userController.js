@@ -580,8 +580,6 @@ let cancelOrder = async(req,res)=>{
     }
 }
 
-
-
 module.exports = {
     homepage,
     loadregister,
@@ -607,5 +605,5 @@ module.exports = {
     updateAddress,
     deleteAddress,
     updateProfile,
-    cancelOrder 
+    cancelOrder
 }
