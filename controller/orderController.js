@@ -313,6 +313,47 @@ let searchOrder = async(req,res)=>{
     }
 }
 
+const returnProduct = async(req,res)=>{
+    try {
+        const { orderId, returnReason, returnDescription } = req.body;
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+
+        if (order.orderStatus !== 'Delivered') {
+            return res.status(400).json({ success: false, message: 'Only delivered orders can be returned' });
+        }
+
+        // Check if the return is within the allowed time frame (e.g., 7 days)
+        const deliveryDate = new Date(order.updatedAt); // Assuming updatedAt is set when order is delivered
+        const currentDate = new Date();
+        const daysSinceDelivery = (currentDate - deliveryDate) / (1000 * 60 * 60 * 24);
+
+        if (daysSinceDelivery > 7) {
+            return res.status(400).json({ success: false, message: 'Return period has expired' });
+        }
+
+        order.orderStatus = 'Returned';
+        order.returnReason = returnReason;
+        order.returnDescription = returnDescription;
+        await order.save();
+
+        // Process refund
+        if (order.paymentStatus === 'Success') {
+            await refundToWallet(order.user, order.billTotal, order.orderId);
+            order.paymentStatus = 'Refunded';
+            await order.save();
+        }
+
+        res.json({ success: true, message: 'Return request processed successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Error processing return request' });
+    }
+}
+
 module.exports = {
     loadOrder,
     addAddress,
@@ -322,5 +363,6 @@ module.exports = {
     retryPayment,
     cancelOrder,
     refundToWallet,
-    searchOrder
+    searchOrder,
+    returnProduct
 };

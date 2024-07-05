@@ -68,6 +68,13 @@ const orderSchema = mongoose.Schema({
     discount: {
         type: Number,
         default: 0
+    },returnReason: {
+        type: String,
+        default: null
+    },
+    returnDescription: {
+        type: String,
+        default: null
     }
 }, {
     timestamps: true,

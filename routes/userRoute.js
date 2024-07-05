@@ -89,4 +89,5 @@ userRoute.post('/cancel-order', orderController.cancelOrder);
 userRoute.get('/get-wallet-data',auth.is_login,walletController.wallet)
 
 userRoute.get('/get-order-details/:orderId',auth.is_login,orderController.searchOrder)
+userRoute.post('/return-order',orderController.returnProduct)
 module.exports = userRoute;

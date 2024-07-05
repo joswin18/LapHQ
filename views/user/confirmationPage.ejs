@@ -90,7 +90,7 @@
                             <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %> <%= order.shippingAddress.zipCode %></p>
                         </div>
                     </div>
-                    <% if (order.orderStatus === 'Delivered' ||order.orderStatus === 'Cancelled') { %>
+                    <% if (order.orderStatus === 'Delivered' ||order.orderStatus === 'Cancelled' ||order.orderStatus === 'Returned') { %>
                      
                     
                     <% } else { %>
@@ -103,10 +103,57 @@
                     <% if (order.paymentStatus === 'Failed' || order.paymentStatus === 'Pending') { %>
                         <button id="retryPaymentBtn" class="btn btn-primary mt-20">Retry Payment</button>
                     <% } %>
+                    <% if (order.paymentStatus === 'Success' && order.orderStatus === 'Delivered') { %>
+                        <button id="returnProductBtn" class="btn btn-secondary mt-20">Return Product</button>
+                    <% } %>
+                    <!-- return product model -->
+                    <div class="modal fade" id="returnOrderModal" tabindex="-1" aria-labelledby="returnOrderModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="returnOrderModalLabel">Return Order</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="returnOrderForm">
+                                        <div class="mb-3">
+                                            <label class="form-label">Reason for Return</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="returnReason" id="defectiveProduct" value="Defective Product" required>
+                                                <label class="form-check-label" for="defectiveProduct">Defective Product</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="returnReason" id="wrongProduct" value="Wrong Product">
+                                                <label class="form-check-label" for="wrongProduct">Wrong Product</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="returnReason" id="notAsDescribed" value="Not as Described">
+                                                <label class="form-check-label" for="notAsDescribed">Not as Described</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="returnReason" id="otherReason" value="Other">
+                                                <label class="form-check-label" for="otherReason">Other</label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="returnDescription" class="form-label">Description</label>
+                                            <textarea class="form-control" id="returnDescription" name="returnDescription" rows="3" required></textarea>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-primary" id="submitReturnRequest">Submit Return Request</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>
     </section>
+    
 </main>
 <div class="modal fade" id="cancelOrder<%= order._id %>" tabindex="-1" aria-labelledby="editOrderModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -222,6 +269,50 @@
             }
         });
     }
+    </script>
+    <script>
+        document.getElementById('returnProductBtn').addEventListener('click', function() {
+            $('#returnOrderModal').modal('show');
+        });
+        
+        document.getElementById('submitReturnRequest').addEventListener('click', function() {
+            const form = document.getElementById('returnOrderForm');
+            if (form.checkValidity()) {
+                const returnReason = document.querySelector('input[name="returnReason"]:checked').value;
+                const returnDescription = document.getElementById('returnDescription').value;
+                
+                fetch('/return-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: '<%= order._id %>',
+                        returnReason: returnReason,
+                        returnDescription: returnDescription
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire('Success', 'Return request submitted successfully', 'success')
+                        .then(() => {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire('Error', 'An error occurred while submitting the return request', 'error');
+                });
+        
+                $('#returnOrderModal').modal('hide');
+            } else {
+                form.reportValidity();
+            }
+        });
     </script>
 
 <%- include("../partials/homepage/userFooter") %>
