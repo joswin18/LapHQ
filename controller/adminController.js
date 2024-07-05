@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt')
 const sharp = require('sharp')
 const path = require('path')
 const Order = require('../model/orderModel')
+const Coupon = require('../model/couponModel');
 const validator = require('validator')
 
 
@@ -535,6 +536,18 @@ let updateOrderStatus = async(req,res) => {
     }
 };
 
+let loadSalesReport = async(req,res)=>{
+    try {
+        let orderDetails = await Order.find({ orderStatus: 'Delivered' }).populate('user')
+
+        console.log(orderDetails.orderId)
+        console.log(orderDetails)
+        res.render('salesReport',{orderDetails:orderDetails})
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
 module.exports = {
     loadLogin,
     verifyLogin,
@@ -556,5 +569,6 @@ module.exports = {
     categoryEdit,
     loadOrderManagement,
     loadOrderDetails,
-    updateOrderStatus
+    updateOrderStatus,
+    loadSalesReport
 }

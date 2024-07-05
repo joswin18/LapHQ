@@ -31,6 +31,7 @@ adminRoute.set('view engine','ejs')
 adminRoute.set('views','./views/admin/')
 
 const adminController = require('../controller/adminController')
+const couponController = require('../controller/couponController')
 
 adminRoute.get('/',adminAuth.islogout,adminController.loadLogin)
 adminRoute.post('/',adminController.verifyLogin)
@@ -58,5 +59,13 @@ adminRoute.post('/categoryEdit',adminController.categoryEdit)
 adminRoute.get('/orderList',adminAuth.islogin,adminController.loadOrderManagement)
 adminRoute.get('/orderDetails',adminAuth.islogin,adminController.loadOrderDetails)
 adminRoute.post('/updateOrderStatus',adminController.updateOrderStatus)
+
+adminRoute.get('/couponManagement',adminAuth.islogin,couponController.loadCouponManagement)
+adminRoute.post('/coupons',couponController.createCoupon)
+adminRoute.get('/coupons/delete/:id',couponController.deleteCoupon)
+adminRoute.get('/coupons/restore/:id',couponController.restoreCoupon)
+adminRoute.post('/coupons/update', couponController.updateCoupon)
+
+adminRoute.get('/salesReport',adminAuth.islogin,adminController.loadSalesReport)
 
 module.exports = adminRoute;

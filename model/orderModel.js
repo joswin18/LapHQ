@@ -60,6 +60,14 @@ const orderSchema = mongoose.Schema({
     couponApplied: {
         type: Boolean,
         default: false
+    },
+    couponCode: {
+        type: String,
+        default: null
+    },
+    discount: {
+        type: Number,
+        default: 0
     }
 }, {
     timestamps: true,

@@ -23,6 +23,10 @@
                             <p>Total: $<%= order.billTotal.toFixed(2) %></p>
                             <p>Payment Method: <%= order.paymentMethod %></p>
                             <p>Payment Status: <%= order.paymentStatus %></p>
+                            <% if (order.couponApplied) { %>
+                                <p>Coupon Applied: <%= order.couponCode %></p>
+                                <p>Discount: $<%= order.discount.toFixed(2) %></p>
+                            <% } %>
                         </div>
                     </div>
 
@@ -55,15 +59,21 @@
                                 <tfoot>
                                     <tr>
                                         <th colspan="4">Subtotal</th>
-                                        <td>$<%= order.billTotal.toFixed(2) %></td>
+                                        <td>$<%= (order.billTotal + order.discount).toFixed(2) %></td>
                                     </tr>
+                                    <% if (order.couponApplied) { %>
+                                        <tr>
+                                            <th colspan="4">Discount (Coupon: <%= order.couponCode %>)</th>
+                                            <td>-$<%= order.discount.toFixed(2) %></td>
+                                        </tr>
+                                    <% } %>
                                     <tr>
                                         <th colspan="4">Shipping</th>
                                         <td>$<%= order.shippingCharge.toFixed(2) %></td>
                                     </tr>
                                     <tr>
                                         <th colspan="4">Total</th>
-                                        <td>$<%= (order.billTotal + order.shippingCharge).toFixed(2) %></td>
+                                        <td>$<%= order.billTotal.toFixed(2) %></td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -90,6 +100,9 @@
                         </button>
                     </div>
                     <% } %>
+                    <% if (order.paymentStatus === 'Failed' || order.paymentStatus === 'Pending') { %>
+                        <button id="retryPaymentBtn" class="btn btn-primary mt-20">Retry Payment</button>
+                    <% } %>
                 </div>
             </div>
         </div>
@@ -113,38 +126,102 @@
     </div>
 </div>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function cancelOrder(orderId){
-        fetch('/cancel-order',{
+        fetch('/cancel-order', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ orderId})
-        }).then((resolve)=>{
-            console.log(resolve)
-            if(resolve){
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ orderId })
+            }).then(response => response.json())
+        .then(data => {
+            if(data.success){
                 Swal.fire({
                     icon: 'success',
-                    title: 'order cancelled',
-                    text: 'order cancelled successfully',
+                    title: 'Order Cancelled',
+                    text: 'Order cancelled successfully. If applicable, refund has been credited to your wallet.',
                     showConfirmButton: false,
                     timer: 1500
                 })
-                .then(()=>{
+                .then(() => {
                     window.location.href = '/account'
                 })
-                
-            }else{
-                console.log('error cancelling the order')
+            } else {
+                Swal.fire('Error', data.message, 'error');
             }
         })
         .catch(error => {
             console.error('Error:', error);
+            Swal.fire('Error', 'An error occurred while cancelling the order', 'error');
+        });
+    }   
+</script>
+<script>
+    document.getElementById('retryPaymentBtn')?.addEventListener('click', async function() {
+        try {
+            const response = await fetch('/retry-payment/<%= order.orderId %>', {
+                method: 'POST',
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                const options = {
+                    "key": "rzp_test_xaGkIpXmOWb28y",
+                    "amount": data.amount,
+                    "currency": "INR",
+                    "name": "LapHQ",
+                    "description": "Payment retry for Order <%= order.orderId %>",
+                    "order_id": data.razorpayOrderId,
+                    "handler": function (response) {
+                        verifyPayment(response, data.orderId);
+                    },
+                    "prefill": {
+                        "name": "<%= order.user.name %>",
+                        "email": "<%= order.user.email %>",
+                        "contact": "<%= order.user.mobile %>"
+                    },
+                    "theme": {
+                        "color": "#F37254"
+                    }
+                };
+                const rzp1 = new Razorpay(options);
+                rzp1.open();
+            } else {
+                Swal.fire('Error', data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire('Error', 'An error occurred while retrying payment', 'error');
+        }
+    });
+    
+    function verifyPayment(response, orderId) {
+        fetch('/verify-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderId: orderId
+            })
+        }).then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire('Payment Successful', 'Your payment has been processed successfully!', 'success')
+                .then(() => {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire('Payment Failed', data.message, 'error');
+            }
         });
     }
-</script>
-
+    </script>
 
 <%- include("../partials/homepage/userFooter") %>

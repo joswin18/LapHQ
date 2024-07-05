@@ -32,7 +32,11 @@ let userSchema = new mongoose.Schema({
     addresses: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Address'
-    }]
+    }],
+    wallet: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Wallet'
+    }
 })
 
 module.exports = mongoose.model('User',userSchema)

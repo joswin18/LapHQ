@@ -4,6 +4,8 @@ const userController = require("../controller/userController");
 const cartController = require("../controller/cartController");
 const orderController = require("../controller/orderController");
 const wishlistController = require("../controller/wishlistController");
+const couponController = require("../controller/couponController");
+const walletController = require("../controller/walletController");
 const session = require('express-session')
 
 let config = require('../config/config')
@@ -18,6 +20,7 @@ const { trusted } = require("mongoose");
 
 userRoute.use(bodyParser.json())
 userRoute.use(bodyParser.urlencoded({extended:true}))
+//dont use
 
 
 userRoute.get('/register',auth.is_logout, userController.loadregister);
@@ -71,11 +74,19 @@ userRoute.get('/checkOut',auth.is_login,orderController.loadOrder)
 userRoute.post('/add-address',orderController.addAddress)
 userRoute.post('/place-order',orderController.placeOrder)
 userRoute.get('/order-confirmation',auth.is_login,orderController.loadConfirmation)
-userRoute.post('/cancel-order',userController.cancelOrder)
+// userRoute.post('/cancel-order',userController.cancelOrder)
 userRoute.post('/verify-order',orderController.verifyPayment)
 
 userRoute.get('/wishlist',auth.is_login,wishlistController.loadWishlist)
 //wishlist 
 userRoute.post('/add-to-wishlist',wishlistController.addToWishlist)
 userRoute.post('/remove-from-wishlist',wishlistController.removeFromWishlist);
+
+userRoute.post('/coupon-applied',couponController.applyCoupon)
+userRoute.post('/retry-payment/:orderId', orderController.retryPayment);
+
+userRoute.post('/cancel-order', orderController.cancelOrder);
+userRoute.get('/get-wallet-data',auth.is_login,walletController.wallet)
+
+userRoute.get('/get-order-details/:orderId',auth.is_login,orderController.searchOrder)
 module.exports = userRoute;

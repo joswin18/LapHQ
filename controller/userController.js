@@ -564,22 +564,6 @@ const updateProfile = async(req,res) =>{
     }
 }
 
-let cancelOrder = async(req,res)=>{
-    try {
-        let {orderId} = req.body;
-        let cancelOrder = await Order.findByIdAndUpdate(orderId,{orderStatus:'Cancelled'})
-
-        if(cancelOrder){
-            res.status(200).json({success:'order cancelled successfully'})
-            console.log('order cancelled')
-        }else{
-            res.status(404).json({ success: false, message: 'Order not found' });
-        }
-    } catch (error) {
-        console.log(error.message)
-    }
-}
-
 module.exports = {
     homepage,
     loadregister,
@@ -604,6 +588,5 @@ module.exports = {
     saveAddress,
     updateAddress,
     deleteAddress,
-    updateProfile,
-    cancelOrder
+    updateProfile
 }

@@ -114,6 +114,7 @@
                             </div>
                             
                         </div>
+                    </form>
                         <div class="col-lg-6">
                             <div class="toggle_info">
                                 <span><i class="fi-rs-label mr-10"></i><span data-toggle="modal" data-target="#couponModal" class="text-muted">Have a coupon?</span> <a href="#couponModal" data-bs-toggle="modal" class="collapsed" aria-expanded="false">Click here to enter your code</a></span>
@@ -130,21 +131,21 @@
                                                 </div>
                                                 <div class="modal-body">
                                                     <p class="mb-30 font-sm">If you have a coupon code, please apply it below.</p>
-                                                    <form method="post">
+                                                    
                                                         <div class="form-group">
-                                                            <input type="text" placeholder="Enter Coupon Code...">
+                                                            <input id="couponCodeInput" type="text" placeholder="Enter Coupon Code...">
                                                         </div>
                                                         <div class="form-group">
-                                                            <button class="btn btn-md" name="login">Apply Coupon</button>
+                                                            <button onclick="applyCoupon()" class="btn btn-md" name="login">Apply Coupon</button>
                                                         </div>
-                                                    </form>
+                                                    
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 <!-- modal coupon -->
                         </div>
-                    </form>
+                    
                 </div>
                 <div class="col-md-6">
                     <div class="order_review">
@@ -179,8 +180,12 @@
                                         <td colspan="2"><em>Free Shipping</em></td>
                                     </tr>
                                     <tr>
+                                        <th>discount</th>
+                                        <td colspan="2"><em id="discount">0</em></td>
+                                    </tr>
+                                    <tr>
                                         <th>Total</th>
-                                        <td colspan="2" class="product-subtotal"><span class="font-xl text-brand fw-900">$<%= cartData.total %></span></td>
+                                        <td colspan="2" class="product-subtotal font-xl text-brand fw-900">$<span class="font-xl text-brand fw-900" id="total"><%= cartData.total %></span></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -229,6 +234,46 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<script>
+        async function applyCoupon() {
+            alert('coupon applied')
+            
+            const couponCode = document.getElementById('couponCodeInput').value;
+            alert(couponCode)
+            let response = await fetch('/coupon-applied', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    couponCode
+                })
+
+                
+            })
+        const data = await response.json();
+        console.log(data)
+        if (data.success) {
+            const total=document.getElementById("total").innerHTML
+            document.getElementById('discount').innerHTML=data.discount
+
+            let discountValue=parseInt(total)-parseInt(data.discount)
+            document.getElementById("total").innerHTML=discountValue
+
+            appliedCouponId = data.couponId;
+            appliedCouponCode = couponCode;
+            appliedDiscount = data.discount;
+            Swal.fire('Success', 'Coupon applied successfully!', 'success');
+        } else {
+            Swal.fire('Error', data.message, 'error');
+        }
+        // document.getElementById('couponCodeField').value = couponCode;
+         
+        $('#couponModal').modal('hide');
+    }
+</script>
+
 <script>
      const placeOrderBtn = document.getElementById('placeOrderBtn');
 placeOrderBtn.addEventListener('click', async function() {
@@ -259,8 +304,9 @@ placeOrderBtn.addEventListener('click', async function() {
         return;
     }
 
+    const total=document.getElementById("total").innerHTML
     if (selectedPayment.value === 'Razorpay') {
-
+            
         const response = await fetch('/place-order', {
             method: 'POST',
             headers: {
@@ -269,13 +315,15 @@ placeOrderBtn.addEventListener('click', async function() {
             body: JSON.stringify({
                 address: addressData,
                 paymentOption: 'Razorpay',
-                newAddress: differentAddress
+                newAddress: differentAddress,
+                total:total
             })
         });
         
         const data = await response.json();
         
         if (data.success) {
+            console.log(data)
             const options = {
                 "key": "rzp_test_xaGkIpXmOWb28y",
                 "amount": data.amount,
@@ -284,18 +332,24 @@ placeOrderBtn.addEventListener('click', async function() {
                 "description": "Test Transaction",
                 "order_id": data.razorpayOrderId, 
                 "handler": function (response) {
-                    
                     fetch('/verify-order', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({response,
-                            orderId:data.orderId})
+                        body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            orderId: data.orderId
+                        })
                     }).then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            window.location.href = "/order-confirmation?orderId=" + data.orderId;
+                            Swal.fire('Payment Successful', 'Your order has been placed successfully!', 'success')
+                            .then(() => {
+                                window.location.href = "/order-confirmation?orderId=" + data.orderId;
+                            });
                         } else {
                             Swal.fire('Payment Failed', data.message, 'error');
                         }
@@ -319,7 +373,11 @@ placeOrderBtn.addEventListener('click', async function() {
         const orderData = {
             address: addressData,
             paymentOption: selectedPayment.value,
-            newAddress: differentAddress
+            newAddress: differentAddress,
+            total:total,
+            couponId:appliedCouponId,
+            couponCode: appliedCouponCode,
+            discount: appliedDiscount
         };
 
         const response = await fetch('/place-order', {
