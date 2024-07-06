@@ -138,7 +138,7 @@ let placeOrder = async (req, res) => {
         let razorpayOrderId = null;
         if (paymentOption === 'Razorpay') {
             const razorpayOrder = await razorpay.orders.create({
-                amount: parseIntTotal * 100, // Amount in paise
+                amount: parseIntTotal * 100, 
                 currency: "INR",
                 receipt: `order_rcptid_${orderId}`
             });
@@ -194,7 +194,7 @@ let verifyPayment = async (req, res) => {
         const generated_signature = hmac.digest('hex');
 
         if (generated_signature === razorpay_signature) {
-            // Payment is successful
+            
             await Order.findOneAndUpdate({ orderId: orderId }, {
                 orderStatus: 'Confirmed',
                 paymentStatus: 'Success'
@@ -224,7 +224,7 @@ const retryPayment = async (req, res) => {
         }
 
         const razorpayOrder = await razorpay.orders.create({
-            amount: order.billTotal * 100, // Amount in paise
+            amount: order.billTotal * 100, 
             currency: "INR",
             receipt: `order_rcptid_${orderId}_retry`
         });
@@ -256,11 +256,11 @@ const cancelOrder = async (req, res) => {
 
         // Check if the order was paid
         if (order.paymentStatus === 'Success') {
-            // If paid, refund to wallet
+            
             await refundToWallet(order.user, order.billTotal, order.orderId);
         }
 
-        // Update order status
+        
         order.orderStatus = 'Cancelled';
         order.paymentStatus = 'Refunded';
         await order.save();

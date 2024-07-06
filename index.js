@@ -6,8 +6,9 @@ const mongoose = require("mongoose");
 const nocache = require('nocache')
 require('dotenv').config();
 
+const mongoDBUri = process.env.MONGODB_URI;
 
-mongoose.connect('mongodb://localhost:27017/lapHQ')
+mongoose.connect(mongoDBUri)
 
 app.use(nocache())
 
