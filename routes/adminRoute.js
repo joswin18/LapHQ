@@ -67,5 +67,6 @@ adminRoute.get('/coupons/restore/:id',couponController.restoreCoupon)
 adminRoute.post('/coupons/update', couponController.updateCoupon)
 
 adminRoute.get('/salesReport',adminAuth.islogin,adminController.loadSalesReport)
+adminRoute.get('/salesReport/download',adminAuth.islogin,adminController.downloadSalesReport)
 
 module.exports = adminRoute;

@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const path = require("path");
-const ejs = require("ejs")
+// const ejs = require("ejs")
 const mongoose = require("mongoose");
 const nocache = require('nocache')
 require('dotenv').config();

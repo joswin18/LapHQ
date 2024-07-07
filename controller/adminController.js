@@ -7,7 +7,8 @@ const path = require('path')
 const Order = require('../model/orderModel')
 const Coupon = require('../model/couponModel');
 const validator = require('validator')
-
+const PDFDocument = require('pdfkit');
+const excel = require('excel4node');
 
 const loadLogin = async(req,res)=>{
     try{
@@ -536,17 +537,146 @@ let updateOrderStatus = async(req,res) => {
     }
 };
 
-let loadSalesReport = async(req,res)=>{
+const loadSalesReport = async (req, res) => {
     try {
-        let orderDetails = await Order.find({ orderStatus: 'Delivered' }).populate('user')
+        let startDate = req.query.startDate ? new Date(req.query.startDate) : new Date(0);
+        let endDate = req.query.endDate ? new Date(req.query.endDate) : new Date();
 
-        console.log(orderDetails.orderId)
-        console.log(orderDetails)
-        res.render('salesReport',{orderDetails:orderDetails})
+        endDate.setHours(23, 59, 59, 999);
+
+        let filter = req.query.filter;
+        if (filter) {
+            let today = new Date();
+            switch (filter) {
+                case 'day':
+                    startDate = new Date(today.setHours(0, 0, 0, 0));
+                    break;
+                case 'week':
+                    startDate = new Date(today.setDate(today.getDate() - 7));
+                    break;
+                case 'month':
+                    startDate = new Date(today.setMonth(today.getMonth() - 1));
+                    break;
+            }
+        }
+
+        let orderDetails = await Order.find({
+            orderStatus: 'Delivered',
+            orderDate: { $gte: startDate, $lte: endDate }
+        }).populate('user');
+
+        let overallSalesCount = orderDetails.length;
+        let overallOrderAmount = orderDetails.reduce((total, order) => total + order.billTotal, 0);
+        let overallDiscount = orderDetails.reduce((total, order) => total + order.discount, 0);
+
+        res.render('salesReport',{
+            orderDetails: orderDetails,
+            overallSalesCount: overallSalesCount,
+            overallOrderAmount: overallOrderAmount,
+            overallDiscount: overallDiscount,
+            startDate: startDate,
+            endDate: endDate,
+            filter: filter
+        });
     } catch (error) {
-        console.log(error.message)
+        console.log(error.message);
+        res.status(500).send('Internal Server Error');
     }
-}
+};
+
+
+const generatePDF = async (res, orderDetails, totals) => {
+    const doc = new PDFDocument();
+    
+    doc.pipe(res);
+    
+    doc.fontSize(18).text('Sales Report', {align: 'center'});
+    doc.moveDown();
+    
+    doc.fontSize(14).text(`Total Sales: ${totals.overallSalesCount}`);
+    doc.text(`Total Amount: $${totals.overallOrderAmount.toFixed(2)}`);
+    doc.text(`Total Discount: $${totals.overallDiscount.toFixed(2)}`);
+    doc.moveDown();
+    
+    doc.fontSize(12);
+    orderDetails.forEach((order, index) => {
+        doc.text(`Order ID: ${order.orderId}`);
+        doc.text(`User: ${order.user.name}`);
+        doc.text(`Amount: $${order.billTotal.toFixed(2)}`);
+        doc.text(`Discount: $${order.discount.toFixed(2)}`);
+        doc.text(`Date: ${order.orderDate.toLocaleDateString()}`);
+        doc.text(`Payment Method: ${order.paymentMethod}`);
+        doc.moveDown();
+    });
+    
+    doc.end();
+};
+
+const generateExcel = async (res, orderDetails, totals) => {
+    const workbook = new excel.Workbook();
+    const worksheet = workbook.addWorksheet('Sales Report');
+    
+    const style = workbook.createStyle({
+        font: {
+            bold: true,
+            color: '#000000',
+            size: 12,
+        },
+    });
+    
+    worksheet.cell(1, 1).string('Sales Report').style(style);
+    worksheet.cell(2, 1).string(`Total Sales: ${totals.overallSalesCount}`).style(style);
+    worksheet.cell(3, 1).string(`Total Amount: $${totals.overallOrderAmount.toFixed(2)}`).style(style);
+    worksheet.cell(4, 1).string(`Total Discount: $${totals.overallDiscount.toFixed(2)}`).style(style);
+    
+    const headers = ['Order ID', 'User', 'Amount', 'Discount', 'Date', 'Payment Method'];
+    headers.forEach((header, index) => {
+        worksheet.cell(6, index + 1).string(header).style(style);
+    });
+    
+    orderDetails.forEach((order, index) => {
+        worksheet.cell(index + 7, 1).string(order.orderId);
+        worksheet.cell(index + 7, 2).string(order.user.name);
+        worksheet.cell(index + 7, 3).number(parseFloat(order.billTotal.toFixed(2)));
+        worksheet.cell(index + 7, 4).number(parseFloat(order.discount.toFixed(2)));
+        worksheet.cell(index + 7, 5).string(order.orderDate.toLocaleDateString());
+        worksheet.cell(index + 7, 6).string(order.paymentMethod);
+    });
+    
+    workbook.write('Sales Report.xlsx', res);
+};
+
+const downloadSalesReport = async (req, res) => {
+    try {
+        const { startDate, endDate, format } = req.query;
+        
+        let orderDetails = await Order.find({
+            orderStatus: 'Delivered',
+            orderDate: { $gte: new Date(startDate), $lte: new Date(endDate) }
+        }).populate('user');
+
+        let totals = {
+            overallSalesCount: orderDetails.length,
+            overallOrderAmount: orderDetails.reduce((total, order) => total + order.billTotal, 0),
+            overallDiscount: orderDetails.reduce((total, order) => total + order.discount, 0)
+        };
+
+        if (format === 'pdf') {
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', 'attachment; filename=sales_report.pdf');
+            await generatePDF(res, orderDetails, totals);
+        } else if (format === 'excel') {
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename=sales_report.xlsx');
+            await generateExcel(res, orderDetails, totals);
+        } else {
+            res.status(400).send('Invalid format specified');
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send('Internal Server Error');
+    }
+};
 
 module.exports = {
     loadLogin,
@@ -570,5 +700,6 @@ module.exports = {
     loadOrderManagement,
     loadOrderDetails,
     updateOrderStatus,
-    loadSalesReport
+    loadSalesReport,
+    downloadSalesReport
 }

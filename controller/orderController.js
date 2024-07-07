@@ -135,6 +135,29 @@ let placeOrder = async (req, res) => {
         await newOrder.save();
         await Cart.findOneAndUpdate({ userId }, { $set: { items: [], total: 0 } });
 
+        if (paymentOption === 'Wallet') {
+            const wallet = await Wallet.findOne({ user: userId });
+            if (!wallet || wallet.balance < parseIntTotal) {
+                return res.status(400).json({ success: false, message: 'Insufficient wallet balance' });
+            }
+
+            
+            wallet.balance -= parseIntTotal;
+            wallet.transactions.push({
+                type: 'Debit',
+                transationMode: 'Purchase',
+                amount: parseIntTotal,
+                date: new Date()
+            });
+            await wallet.save();
+
+            newOrder.paymentStatus = 'Success';
+            newOrder.orderStatus = 'Confirmed';
+            await newOrder.save();
+        }
+        
+        
+        
         let razorpayOrderId = null;
         if (paymentOption === 'Razorpay') {
             const razorpayOrder = await razorpay.orders.create({

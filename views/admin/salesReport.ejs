@@ -1,107 +1,101 @@
 <%- include("../partials/adminpartials/dashHeader") %>
 
-<main class="main-wrap">
-    <section class="content-main">
-        <div class="content-header">
-            <div>
-                <h2 class="content-title card-title">Sales Report</h2>
-                <p>Lorem ipsum dolor sit amet.</p>
-            </div>
-            <div>
-                <input type="text" placeholder="Search order ID" class="form-control bg-white">
-            </div>
-        </div>
-        <div class="card mb-4">
-            <header class="card-header">
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title card-title">Sales Report</h2>
+    </div>
+
+    <div class="card mb-4">
+        <header class="card-header">
+            <form action="/admin/salesReport" method="GET">
                 <div class="row gx-3">
-                    <!-- <div class="col-lg-4 col-md-6 me-auto">
-                        <input type="text" placeholder="Search..." class="form-control">
-                    </div> -->
-                    <div class="col-lg-2 col-6 col-md-3">
-                        <select class="form-select">
-                            <option>Status</option>
-                            <option>Active</option>
-                            <option>Disabled</option>
-                            <option>Show all</option>
+                    <div class="col-lg-2 col-md-3 col-6">
+                        <input type="date" name="startDate" class="form-control" value="<%= startDate.toISOString().split('T')[0] %>">
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-6">
+                        <input type="date" name="endDate" class="form-control" value="<%= endDate.toISOString().split('T')[0] %>">
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-6">
+                        <select name="filter" class="form-select">
+                            <option value="">Custom Range</option>
+                            <option value="day" <%= filter === 'day' ? 'selected' : '' %>>1 Day</option>
+                            <option value="week" <%= filter === 'week' ? 'selected' : '' %>>1 Week</option>
+                            <option value="month" <%= filter === 'month' ? 'selected' : '' %>>1 Month</option>
                         </select>
                     </div>
-                    <div class="col-lg-2 col-6 col-md-3">
-                        <select class="form-select">
-                            <option>Show 20</option>
-                            <option>Show 30</option>
-                            <option>Show 40</option>
-                        </select>
+                    <div class="col-lg-2 col-md-3 col-6">
+                        <button type="submit" class="btn btn-primary">Filter</button>
                     </div>
                 </div>
-            </header> <!-- card-header end// -->
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+            </form>
+            <div class="mb-3">
+                <a href="/admin/salesReport/download?startDate=<%= startDate.toISOString().split('T')[0] %>&endDate=<%= endDate.toISOString().split('T')[0] %>&format=pdf" class="btn btn-secondary">Download PDF</a>
+                <a href="/admin/salesReport/download?startDate=<%= startDate.toISOString().split('T')[0] %>&endDate=<%= endDate.toISOString().split('T')[0] %>&format=excel" class="btn btn-secondary">Download Excel</a>
+            </div>
+        </header>
+
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card card-body mb-4">
+                        <h5 class="card-title">Overall Sales Count</h5>
+                        <h6><%= overallSalesCount %></h6>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card card-body mb-4">
+                        <h5 class="card-title">Overall Order Amount</h5>
+                        <h6>$<%= overallOrderAmount.toFixed(2) %></h6>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card card-body mb-4">
+                        <h5 class="card-title">Overall Discount</h5>
+                        <h6>$<%= overallDiscount.toFixed(2) %></h6>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th scope="col">User Email</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Coupon Applied</th>
+                            <th scope="col">Discount</th>
+                            <th scope="col">Date</th>
+                            <th scope="col" class="text-end">Method</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for (let i=0; i<orderDetails.length; i++) { %>
                             <tr>
-                                <th>#ID</th>
-                                <!-- <th scope="col">product name</th> -->
-                                <th scope="col">user email</th>
-                                <th scope="col">amount</th>
-                                <th scope="col">coupon applied</th>
-                                <th scope="col">discount</th>
-                                <th scope="col">Date</th>
-                                <th scope="col" class="text-end"> method </th>
+                                <td><%= orderDetails[i].orderId %></td>
+                                <td><%= orderDetails[i].user.name%></td>
+                                <td>$<%= orderDetails[i].billTotal.toFixed(2) %></td>
+                                <td>
+                                    <% if (orderDetails[i].couponCode) { %>
+                                        <span class="badge rounded-pill alert-success">
+                                            <%= orderDetails[i].couponCode %>
+                                        </span>
+                                    <% } else { %>
+                                        No Coupon
+                                    <% } %> 
+                                </td>
+                                <td>$<%= orderDetails[i].discount.toFixed(2) %></td>
+                                <td><%= orderDetails[i].orderDate.toLocaleDateString() %></td>
+                                <td class="text-end">
+                                    <p><%= orderDetails[i].paymentMethod %></p>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <% for (let i=0;i<orderDetails.length;i++) { %>
-                                
-                                
-                            
-                                <tr>
-                                    <td><%= orderDetails[i].orderId %></td>
-                                    <!-- <td><b>Marvin McKinney</b></td> -->
-                                    <td><%= orderDetails[i].user.name%></td>
-                                    <td>$<%= orderDetails[i].billTotal %></td>
-                                    <td>
-                                        <% if (orderDetails[i].couponCode) { %>
-                                            <span class="badge rounded-pill alert-success">
-                                                <%= orderDetails[i].couponCode %>
-                                            </span>
-                                        <% } else { %>
-                                            No Coupon
-                                        <% } %> 
-                                    </td>
-                                    <td>$<%= orderDetails[i].discount %></td>
-                                    <td><%= orderDetails[i].orderDate.toLocaleDateString() %></td>
-                                    <td class="text-end">
-                                        <p><%= orderDetails[i].paymentMethod  %></p>
-                                        <!-- <a href="#" class="btn btn-md rounded font-sm">Detail</a> -->
-                                        <!-- <div class="dropdown">
-                                            <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">View detail</a>
-                                                <a class="dropdown-item" href="#">Edit info</a>
-                                                <a class="dropdown-item text-danger" href="#">Delete</a>
-                                            </div> -->
-                                        <!--</div>  dropdown //end -->
-                                    </td>
-                                </tr>
-                             <% } %>
-                        </tbody>
-                    </table>
-                </div> <!-- table-responsive //end -->
-            </div> <!-- card-body end// -->
-        </div> <!-- card end// -->
-        <div class="pagination-area mt-15 mb-50">
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-start">
-                    <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                    <li class="page-item"><a class="page-link" href="#">02</a></li>
-                    <li class="page-item"><a class="page-link" href="#">03</a></li>
-                    <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                    <li class="page-item"><a class="page-link" href="#">16</a></li>
-                    <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
-                </ul>
-            </nav>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </section>
-</main>
+    </div>
+</section>
 
 <%- include("../partials/adminpartials/dashFooter") %>
