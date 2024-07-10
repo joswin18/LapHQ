@@ -26,11 +26,13 @@ let loadOrder = async(req,res)=>{
         let cartData = await Cart.findOne({ userId }).populate('items.productId')
         let userData =  await User.findById(userId)
         let addressData = await Address.find({user:userId})
+        let couponData = await Coupon.find({isActive:true})
+        let usedCoupons = await Order.distinct('couponCode', { user: userId, couponCode: { $ne: null } })
         // console.log(cartData)
         if (!cartData || cartData.items.length === 0) {
             return res.redirect('/cart'); 
         }
-        res.render('checkoutPage',{req:req,cartData,userData,addressData})
+        res.render('checkoutPage',{req:req,cartData,userData,addressData,couponData,usedCoupons})
     } catch (error) {
         console.log(error.message)
     }
