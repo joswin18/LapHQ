@@ -3,7 +3,7 @@ const User = require('../model/userModel');
 
 let wallet = async(req,res)=>{
     try {
-        const userId = req.session.user_id; // Assuming you store user ID in session
+        const userId = req.session.user_id;
         const wallet = await Wallet.findOne({ user: userId });
         
         if (wallet) {

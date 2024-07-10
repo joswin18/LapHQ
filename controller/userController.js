@@ -292,10 +292,19 @@ let verifyOtp = async (req, res) => {
 let loadAccount = async(req,res)=>{
     try {
         let userId = req.session.user_id
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
+        const totalOrders = await Order.countDocuments({ user: userId });
+        
         let orderData = await Order.find({ user: userId })
             .populate('user')
             .populate('shippingAddress')
             .populate('items.product')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
             console.log('heloooooo',orderData)
 
@@ -303,7 +312,7 @@ let loadAccount = async(req,res)=>{
         let userData=await User.findById(req.session.user_id)
         console.log(userData);
         console.log('hiiii',addressData);
-        res.render('accountDetails',{req:req,addressData:addressData,userData:userData,orderData:orderData})
+        res.render('accountDetails',{req:req,addressData:addressData,userData:userData,orderData:orderData,currentPage: page,totalPages: Math.ceil(totalOrders / limit)})
     } catch (error) {
         console.log(error.message);
     }

@@ -52,11 +52,12 @@ let restoreCoupon = async(req,res)=>{
 
 let updateCoupon = async (req, res) => {
     try {
-        const { couponId, code, discountPercentage, minimumPurchase, startDate, endDate, description } = req.body;
+        const { couponId, code, discountPercentage, minimumPurchase,maximumPurchase, startDate, endDate, description } = req.body;
         await Coupon.findByIdAndUpdate(couponId, {
             code,
             discountPercentage,
             minimumPurchase,
+            maximumPurchase,
             startDate,
             endDate,
             description
@@ -98,6 +99,10 @@ let applyCoupon = async(req,res)=>{
             // }
             if (cart.total < coupon.minimumPurchase) {
                 return res.status(400).json({ success: false, message: 'Cart total does not meet the minimum purchase requirement' });
+            }
+
+            if(cart.total > coupon.maximumPurchase){
+                return res.status(400).json({ success: false, message: 'Cart total does not meet the maximum purchase requirement' });
             }
             discount = (cart.total * coupon.discountPercentage) / 100;
             res.status(200).json({success:true,discount:discount,couponId:coupon._id})

@@ -240,6 +240,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 <script>
+    let appliedCouponId = null;
+    let appliedCouponCode = null;
+    let appliedDiscount = 0;
         async function applyCoupon() {
             alert('coupon applied')
             
@@ -276,9 +279,7 @@
          
         $('#couponModal').modal('hide');
     }
-</script>
 
-<script>
      const placeOrderBtn = document.getElementById('placeOrderBtn');
 placeOrderBtn.addEventListener('click', async function() {
     let addressData;
@@ -345,7 +346,10 @@ placeOrderBtn.addEventListener('click', async function() {
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_signature: response.razorpay_signature,
-                            orderId: data.orderId
+                            orderId: data.orderId,
+                            couponId: appliedCouponId,
+                            couponCode: appliedCouponCode,
+                            discount: appliedDiscount
                         })
                     }).then(res => res.json())
                     .then(data => {
@@ -383,7 +387,10 @@ placeOrderBtn.addEventListener('click', async function() {
             address: addressData,
             paymentOption: 'Wallet',
             newAddress: differentAddress,
-            total: total
+            total: total,
+            couponId: appliedCouponId,
+            couponCode: appliedCouponCode,
+            discount: appliedDiscount
         })
     });
 

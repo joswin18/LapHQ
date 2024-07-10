@@ -166,6 +166,11 @@ let placeOrder = async (req, res) => {
                 receipt: `order_rcptid_${orderId}`
             });
             razorpayOrderId = razorpayOrder.id;
+
+            newOrder.couponApplied = couponApplied;
+            newOrder.couponCode = couponCode || null;
+            newOrder.discount = discount || 0;
+            await newOrder.save();
         }
 
         res.json({ 
@@ -173,7 +178,10 @@ let placeOrder = async (req, res) => {
             orderId: newOrder.orderId, 
             razorpayOrderId: razorpayOrderId, 
             products: productDetails, 
-            total: parseIntTotal
+            total: parseIntTotal,
+            couponApplied,
+            couponCode,
+            discount
         });
     } catch (error) {
         console.error(error);
@@ -223,7 +231,9 @@ let verifyPayment = async (req, res) => {
                 paymentStatus: 'Success'
             });
 
-            return res.json({ success: true, orderId: orderId });
+            const order = await Order.findOne({ orderId: orderId });
+
+            return res.json({ success: true, orderId: orderId ,couponApplied: order.couponApplied, couponCode: order.couponCode, discount: order.discount});
         } else {
             await Order.findOneAndUpdate({ orderId: orderId }, {
                 orderStatus: 'Failed',
@@ -349,8 +359,8 @@ const returnProduct = async(req,res)=>{
             return res.status(400).json({ success: false, message: 'Only delivered orders can be returned' });
         }
 
-        // Check if the return is within the allowed time frame (e.g., 7 days)
-        const deliveryDate = new Date(order.updatedAt); // Assuming updatedAt is set when order is delivered
+        // for 7 days check
+        const deliveryDate = new Date(order.updatedAt); 
         const currentDate = new Date();
         const daysSinceDelivery = (currentDate - deliveryDate) / (1000 * 60 * 60 * 24);
 
@@ -363,7 +373,7 @@ const returnProduct = async(req,res)=>{
         order.returnDescription = returnDescription;
         await order.save();
 
-        // Process refund
+        
         if (order.paymentStatus === 'Success') {
             await refundToWallet(order.user, order.billTotal, order.orderId);
             order.paymentStatus = 'Refunded';

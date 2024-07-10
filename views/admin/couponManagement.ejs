@@ -34,7 +34,10 @@
                             <label for="min_purchase" class="form-label">Minimum Purchase</label>
                             <input name="minimumPurchase" type="number" placeholder="Enter min purchase" class="form-control" id="min_purchase" />
                         </div>
-                        
+                        <div class="mb-4">
+                            <label for="max_purchase" class="form-label">Maximum Purchase</label>
+                            <input name="maximumPurchase" type="number" placeholder="Enter max purchase" class="form-control" id="max_purchase" />
+                        </div>
                         <div class="mb-4">
                             <label for="start_date" class="form-label">Start Date</label>
                             <input name="startDate" type="date" class="form-control" id="start_date" required />
@@ -85,6 +88,7 @@
                                                     data-code="<%= coupon.code %>"
                                                     data-discount="<%= coupon.discountPercentage %>"
                                                     data-min-purchase="<%= coupon.minimumPurchase %>"
+                                                    data-max-purchase="<%= coupon.maximumPurchase %>"
                                                     data-start-date="<%= coupon.startDate.toISOString().split('T')[0] %>"
                                                     data-end-date="<%= coupon.endDate.toISOString().split('T')[0] %>"
                                                     data-description="<%= coupon.description %>">Edit info</a>
@@ -136,6 +140,10 @@
             <div class="mb-3">
               <label for="editMinimumPurchase" class="form-label">Minimum Purchase</label>
               <input type="number" class="form-control" id="editMinimumPurchase" name="minimumPurchase">
+            </div>
+            <div class="mb-3">
+                <label for="editMaximumPurchase" class="form-label">Maximum Purchase</label>
+                <input type="number" class="form-control" id="editMaximumPurchase" name="maximumPurchase">
             </div>
             <div class="mb-3">
               <label for="editStartDate" class="form-label">Start Date</label>
@@ -231,14 +239,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function validateMinPurchase() {
-        const minPurchase = parseFloat(minPurchaseInput.value);
-        if (isNaN(minPurchase) || minPurchase < 0) {
-            showError(minPurchaseInput, 'Minimum purchase must be a positive number.');
+    const minPurchase = parseFloat(minPurchaseInput.value);
+    const maxPurchase = parseFloat(document.getElementById('max_purchase').value);
+    
+    if (isNaN(minPurchase) || minPurchase < 0) {
+        showError(minPurchaseInput, 'Minimum purchase must be a positive number.');
+        return false;
+    }
+    if (maxPurchase && minPurchase >= maxPurchase) {
+        showError(minPurchaseInput, 'Minimum purchase must be less than maximum purchase.');
+        return false;
+    }
+    clearError(minPurchaseInput);
+    return true;
+}
+
+    function validateMaxPurchase() {
+    const maxPurchase = parseFloat(document.getElementById('max_purchase').value);
+    const minPurchase = parseFloat(minPurchaseInput.value);
+    
+    if (maxPurchase) {
+        if (isNaN(maxPurchase) || maxPurchase <= 0) {
+            showError(document.getElementById('max_purchase'), 'Maximum purchase must be a positive number.');
             return false;
         }
-        clearError(minPurchaseInput);
-        return true;
+        if (maxPurchase <= minPurchase) {
+            showError(document.getElementById('max_purchase'), 'Maximum purchase must be greater than minimum purchase.');
+            return false;
+        }
     }
+    clearError(document.getElementById('max_purchase'));
+    return true;
+}
 
     function validateDates() {
         const startDate = new Date(startDateInput.value);
@@ -264,13 +296,17 @@ document.addEventListener('DOMContentLoaded', function() {
         isValid = validateCouponCode() && isValid;
         isValid = validateDiscountPercentage() && isValid;
         isValid = validateMinPurchase() && isValid;
+        isValid = validateMaxPurchase() && isValid;
         isValid = validateDates() && isValid;
         return isValid;
     }
 
     couponCodeInput.addEventListener('input', validateCouponCode);
     discountPercentageInput.addEventListener('input', validateDiscountPercentage);
-    minPurchaseInput.addEventListener('input', validateMinPurchase);
+    minPurchaseInput.addEventListener('input', function() {
+        validateMinPurchase();
+        validateMaxPurchase();
+    });
     startDateInput.addEventListener('change', validateDates);
     endDateInput.addEventListener('change', validateDates);
 
@@ -298,6 +334,7 @@ const editButtons = document.querySelectorAll('.edit-coupon');
             const code = this.getAttribute('data-code');
             const discount = this.getAttribute('data-discount');
             const minPurchase = this.getAttribute('data-min-purchase');
+            const maxPurchase = this.getAttribute('data-max-purchase');
             const startDate = this.getAttribute('data-start-date');
             const endDate = this.getAttribute('data-end-date');
             const description = this.getAttribute('data-description');
@@ -306,6 +343,7 @@ const editButtons = document.querySelectorAll('.edit-coupon');
             document.getElementById('editCouponCode').value = code;
             document.getElementById('editDiscountPercentage').value = discount;
             document.getElementById('editMinimumPurchase').value = minPurchase;
+            document.getElementById('editMaximumPurchase').value = maxPurchase;
             document.getElementById('editStartDate').value = startDate;
             document.getElementById('editEndDate').value = endDate;
             document.getElementById('editDescription').value = description;
@@ -315,6 +353,18 @@ const editButtons = document.querySelectorAll('.edit-coupon');
         });
         document.getElementById('editCouponForm').addEventListener('submit', function(e) {
         e.preventDefault();
+
+        const minPurchase = parseFloat(this.elements.minimumPurchase.value);
+        const maxPurchase = parseFloat(this.elements.maximumPurchase.value);
+
+        if (maxPurchase && maxPurchase <= minPurchase) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Validation Error',
+                text: 'Maximum purchase must be greater than minimum purchase.',
+            });
+            return;
+        }
         
         const formData = new FormData(this);
         const data = Object.fromEntries(formData);
