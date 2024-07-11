@@ -678,6 +678,73 @@ const downloadSalesReport = async (req, res) => {
     }
 };
 
+let loadCategoryOffer = async(req,res)=>{
+    try {
+        let categoryId = req.query.id;
+        let category = await Category.findById(categoryId);
+        if(category){
+            res.render('categoryOffer', { category: category });
+        } else {
+            res.redirect('/admin/category');
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.redirect('/admin/category');
+    }
+}
+
+let addCategoryOffer = async (req, res) => {
+    try {
+        const { categoryId, offerPercentage, startDate, endDate } = req.body;
+        const now = new Date();
+        const offerStartDate = new Date(startDate);
+        const offerEndDate = new Date(endDate);
+
+        const offerData = {
+            percentage: offerPercentage,
+            startDate: offerStartDate,
+            endDate: offerEndDate,
+            active: now >= offerStartDate && now <= offerEndDate
+        };
+
+        const updatedCategory = await Category.findByIdAndUpdate(
+            categoryId,
+            { offer: offerData },
+            { new: true, runValidators: true }
+        );
+
+        if (updatedCategory) {
+            res.redirect('/admin/category');
+        } else {
+            res.render('categoryOffer', { error: 'Failed to add offer', category: await Category.findById(categoryId) });
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+let deleteCategoryOffer = async (req, res) => {
+    try {
+        const categoryId = req.query.id;
+
+        const updatedCategory = await Category.findByIdAndUpdate(
+            categoryId,
+            { $set: { 'offer.active': false } },
+            { new: true }
+        );
+
+        if (updatedCategory) {
+            res.redirect(`/admin/categoryOffer?id=${categoryId}`);
+        } else {
+            res.render('categoryOffer', { error: 'Failed to delete offer', category: await Category.findById(categoryId) });
+        }
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
 module.exports = {
     loadLogin,
     verifyLogin,
@@ -701,5 +768,8 @@ module.exports = {
     loadOrderDetails,
     updateOrderStatus,
     loadSalesReport,
-    downloadSalesReport
+    downloadSalesReport,
+    loadCategoryOffer,
+    addCategoryOffer,
+    deleteCategoryOffer
 }

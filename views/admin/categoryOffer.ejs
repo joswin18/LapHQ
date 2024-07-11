@@ -1,0 +1,83 @@
+<%- include("../partials/adminpartials/dashHeader") %>
+
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Offer for <%= category.name %></h2>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <% if (category.offer && category.offer.percentage > 0) { %>
+                <!-- <h3>Current Offer</h3>
+                <p>Percentage: <%= category.offer.percentage %>%</p>
+                <p>Start Date: <%= category.offer.startDate.toLocaleDateString() %></p>
+                <p>End Date: <%= category.offer.endDate.toLocaleDateString() %></p>
+                <p>Status: <%= category.offer.active ? 'Active' : 'Inactive' %></p>
+                <form action="/admin/deleteCategoryOffer" method="POST">
+                    <input type="hidden" name="categoryId" value="<%= category._id %>">
+                    <button type="submit" class="btn text-danger">Delete Offer</button>
+                </form> -->
+
+                <div class="col-md-9">
+                    <div class="table-responsive">
+                        
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    
+                                    <th>Percentage: </th>
+                                    <th>Start Date: </th>
+                                    <th>End Date: </th>
+                                    <th>Status </th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            
+                            <tbody>
+                                <tr>
+                                    <td><b><%= category.offer.percentage %>%</b></td>
+                                    <td><%= category.offer.startDate.toLocaleDateString() %></td>
+                                    <td><%= category.offer.endDate.toLocaleDateString() %></td>
+                                    <td><%= category.offer.active ? 'Active' : 'Inactive' %></td>
+                                    
+                                    
+                                    <td class="text-end">
+                                        <div class="dropdown">
+                                            <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="/admin/deleteCategoryOffer?id=<%= category._id %>">Delete Offer</a>
+                                                
+                                            </div>
+                                        </div> <!-- dropdown //end -->
+                                    </td>
+                                </tr>
+                            </tbody>
+                            
+
+                        </table>
+                    </div>
+                </div>
+            <% } else { %>
+                <h3>Add New Offer</h3>
+                <form action="/admin/addCategoryOffer" method="POST">
+                    <input type="hidden" name="categoryId" value="<%= category._id %>">
+                    <div class="mb-4">
+                        <label for="offerPercentage" class="form-label">Offer Percentage</label>
+                        <input type="number" name="offerPercentage" id="offerPercentage" class="form-control" min="0" max="100" required>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="date" name="startDate" id="startDate" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="date" name="endDate" id="endDate" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Offer</button>
+                </form>
+            <% } %>
+        </div>
+    </div>
+</section>
+
+<%- include("../partials/adminpartials/dashFooter") %>

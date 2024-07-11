@@ -69,4 +69,8 @@ adminRoute.post('/coupons/update', couponController.updateCoupon)
 adminRoute.get('/salesReport',adminAuth.islogin,adminController.loadSalesReport)
 adminRoute.get('/salesReport/download',adminAuth.islogin,adminController.downloadSalesReport)
 
+
+adminRoute.get('/categoryOffer',adminAuth.islogin,adminController.loadCategoryOffer)
+adminRoute.post('/addCategoryOffer',adminController.addCategoryOffer)
+adminRoute.get('/deleteCategoryOffer',adminController.deleteCategoryOffer)
 module.exports = adminRoute;
