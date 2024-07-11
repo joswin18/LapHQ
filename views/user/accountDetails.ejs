@@ -87,7 +87,11 @@
                                             <% if (req.session.user_id) { %>
                                             <span> <h5 class="mb-0">hello, <%= req.session.userName %></h5></span>
                                             <% } %>
-                                        
+                                            <hr>
+                                            <div>
+                                                <h6>Referral Code</h6>
+                                                <p># <%= userData.referralCode %></p> 
+                                            </div>
                                         </div>
                                         
                                         <div class="card-body">

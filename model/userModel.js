@@ -36,6 +36,14 @@ let userSchema = new mongoose.Schema({
     wallet: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Wallet'
+    },
+    referralCode: {
+        type: String,
+        unique: true
+    },
+    referredBy: {
+        type: String,
+        default: null
     }
 })
 
