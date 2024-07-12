@@ -32,6 +32,12 @@ const productSchema = new mongoose.Schema({
     oldPrice: {
         type: Number
     },
+    discountedPrice: {
+        type: Number
+    },
+    discountedOldPrice: {
+        type: Number
+    },
     isFeatured: {
         type: Boolean,
         default: false

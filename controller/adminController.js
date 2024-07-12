@@ -693,6 +693,43 @@ let loadCategoryOffer = async(req,res)=>{
     }
 }
 
+const updateProductPricesForCategory = async (categoryId) => {
+    try {
+        // Fetch the category with the given ID
+        const category = await Category.findById(categoryId);
+
+        if (!category) {
+            throw new Error('Category not found');
+        }
+
+        // Fetch all products in this category
+        const products = await Product.find({ category: category.name });
+
+        // Iterate over each product and update its price
+        for (const product of products) {
+            if (category.offer.active) {
+
+                product.discountedPrice = product.price;
+                product.discountedOldPrice = product.oldPrice;
+                // Calculate the new price based on the offer percentage
+                product.oldPrice = product.price;
+                product.price = product.price - (product.price * (category.offer.percentage / 100));
+            } else {
+                // Revert the price to the original price if the offer is not active
+                if (product.oldPrice) {
+                    product.price = product.discountedPrice;
+                    product.oldPrice = product.discountedOldPrice;
+                }
+            }
+
+            // Save the updated product
+            await product.save();
+        }
+    } catch (error) {
+        console.error('Error updating product prices:', error);
+    }
+};
+
 let addCategoryOffer = async (req, res) => {
     try {
         const { categoryId, offerPercentage, startDate, endDate } = req.body;
@@ -714,6 +751,7 @@ let addCategoryOffer = async (req, res) => {
         );
 
         if (updatedCategory) {
+            await updateProductPricesForCategory(categoryId);
             res.redirect('/admin/category');
         } else {
             res.render('categoryOffer', { error: 'Failed to add offer', category: await Category.findById(categoryId) });
@@ -730,11 +768,12 @@ let deleteCategoryOffer = async (req, res) => {
 
         const updatedCategory = await Category.findByIdAndUpdate(
             categoryId,
-            { $set: { 'offer.active': false } },
+            { $unset: { offer: "" } },
             { new: true }
         );
 
         if (updatedCategory) {
+            await updateProductPricesForCategory(categoryId);
             res.redirect(`/admin/categoryOffer?id=${categoryId}`);
         } else {
             res.render('categoryOffer', { error: 'Failed to delete offer', category: await Category.findById(categoryId) });
