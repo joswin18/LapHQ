@@ -695,34 +695,31 @@ let loadCategoryOffer = async(req,res)=>{
 
 const updateProductPricesForCategory = async (categoryId) => {
     try {
-        // Fetch the category with the given ID
+ 
         const category = await Category.findById(categoryId);
 
         if (!category) {
             throw new Error('Category not found');
         }
 
-        // Fetch all products in this category
         const products = await Product.find({ category: category.name });
 
-        // Iterate over each product and update its price
         for (const product of products) {
             if (category.offer.active) {
 
                 product.discountedPrice = product.price;
                 product.discountedOldPrice = product.oldPrice;
-                // Calculate the new price based on the offer percentage
+
                 product.oldPrice = product.price;
                 product.price = product.price - (product.price * (category.offer.percentage / 100));
             } else {
-                // Revert the price to the original price if the offer is not active
+
                 if (product.oldPrice) {
                     product.price = product.discountedPrice;
                     product.oldPrice = product.discountedOldPrice;
                 }
             }
 
-            // Save the updated product
             await product.save();
         }
     } catch (error) {
