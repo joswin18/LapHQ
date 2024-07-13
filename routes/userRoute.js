@@ -90,4 +90,6 @@ userRoute.get('/get-wallet-data',auth.is_login,walletController.wallet)
 
 userRoute.get('/get-order-details/:orderId',auth.is_login,orderController.searchOrder)
 userRoute.post('/return-order',orderController.returnProduct)
+
+userRoute.get('/generate-invoice/:orderId',userController.generateInvoice)
 module.exports = userRoute;

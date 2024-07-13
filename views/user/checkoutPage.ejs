@@ -229,6 +229,9 @@
                                 <h5>Payment</h5>
                             </div>
                             <div class="payment_option">
+                                <% if (cartData.total >= 1000) { %>
+                                <% } else { %>
+                                 
                                 <div class="custome-radio">
                                     <input class="form-check-input" required="" type="radio" name="payment_option" id="exampleRadios3" value="COD" checked="">
                                     <label class="form-check-label" for="exampleRadios3" data-bs-toggle="collapse" data-target="#bankTranfer" aria-controls="bankTranfer">COD</label>
@@ -236,6 +239,7 @@
                                         <p class="text-muted mt-5">There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration. </p>
                                     </div>
                                 </div>
+                                <% } %>
                                 <div class="custome-radio">
                                     <input class="form-check-input" required="" type="radio" name="payment_option" id="razorpayRadio" value="Razorpay">
                                     <label class="form-check-label" for="razorpayRadio">Razorpay</label>

@@ -7,7 +7,7 @@ const path = require('path')
 const Order = require('../model/orderModel')
 const Coupon = require('../model/couponModel');
 const validator = require('validator')
-const PDFDocument = require('pdfkit');
+const PDFDocument = require('pdfkit-table');
 const excel = require('excel4node');
 
 const loadLogin = async(req,res)=>{
@@ -598,15 +598,26 @@ const generatePDF = async (res, orderDetails, totals) => {
     doc.text(`Total Discount: $${totals.overallDiscount.toFixed(2)}`);
     doc.moveDown();
     
-    doc.fontSize(12);
-    orderDetails.forEach((order, index) => {
-        doc.text(`Order ID: ${order.orderId}`);
-        doc.text(`User: ${order.user.name}`);
-        doc.text(`Amount: $${order.billTotal.toFixed(2)}`);
-        doc.text(`Discount: $${order.discount.toFixed(2)}`);
-        doc.text(`Date: ${order.orderDate.toLocaleDateString()}`);
-        doc.text(`Payment Method: ${order.paymentMethod}`);
-        doc.moveDown();
+
+    const table = {
+        headers: ['Order ID', 'User', 'Amount', 'Discount', 'Date', 'Payment Method'],
+        rows: []
+    };
+    
+    orderDetails.forEach(order => {
+        table.rows.push([
+            order.orderId,
+            order.user.name,
+            `$${order.billTotal.toFixed(2)}`,
+            `$${order.discount.toFixed(2)}`,
+            order.orderDate.toLocaleDateString(),
+            order.paymentMethod
+        ]);
+    });
+    
+    doc.table(table, {
+        prepareHeader: () => doc.font('Helvetica-Bold').fontSize(10),
+        prepareRow: (row, i) => doc.font('Helvetica').fontSize(10)
     });
     
     doc.end();

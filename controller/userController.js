@@ -9,6 +9,12 @@ let { generateOtp } = require('../otpUtils/otpGenerator');
 let { sendOtp } = require('../otpUtils/insertOtp');
 const crypto = require('crypto');
 const Wallet = require('../model/walletModel');
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
+const path = require('path');
+
+
+
 let securePassword = async(password)=>{
     try{
         let passwordHash = await bcrypt.hash(password, 10)
@@ -616,6 +622,102 @@ const updateProfile = async(req,res) =>{
     }
 }
 
+const generateInvoice = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const order = await Order.findOne({ orderId: orderId })
+            .populate('user')
+            .populate('shippingAddress')
+            .populate('items.product');
+
+        if (!order) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        const doc = new PDFDocument({ margin: 50 });
+        const filename = `invoice-${orderId}.pdf`;
+
+        res.setHeader('Content-disposition', 'attachment; filename="' + filename + '"');
+        res.setHeader('Content-type', 'application/pdf');
+
+        doc.pipe(res);
+
+        // doc.image('/assets/imgs/theme/logo.svg', 50, 45, { width: 50 });
+
+        doc.fontSize(20).text('Order Invoice', { align: 'center' });
+        doc.moveDown();
+
+        doc.fontSize(10);
+        doc.text(`Invoice Number: ${order.orderId}`, 50, 100);
+        doc.text(`Date: ${order.orderDate.toLocaleDateString()}`, 50, 115);
+        doc.text(`Payment Method: ${order.paymentMethod}`, 50, 130);
+
+        const invoiceTableTop = 160;
+        doc.font('Helvetica-Bold');
+        doc.text('Item', 50, invoiceTableTop);
+        doc.text('Image', 200, invoiceTableTop);
+        doc.text('Quantity', 300, invoiceTableTop);
+        doc.text('Price', 400, invoiceTableTop);
+        doc.text('Total', 500, invoiceTableTop);
+
+        let tableTop = invoiceTableTop + 20;
+        doc.font('Helvetica');
+
+        for (const item of order.items) {
+            const itemTotal = item.quantity * item.product.price;
+            
+            doc.text(item.product.name, 50, tableTop, { width: 140 });
+            
+            const imagePath = path.join(__dirname, '..', 'public', 'productImages', item.product.defaultImg[0]);
+            if (fs.existsSync(imagePath)) {
+                doc.image(imagePath, 200, tableTop - 10, { width: 30 });
+            }
+            
+            doc.text(item.quantity.toString(), 300, tableTop);
+            doc.text(`$${item.product.price.toFixed(2)}`, 400, tableTop);
+            doc.text(`$${itemTotal.toFixed(2)}`, 500, tableTop);
+
+            tableTop += 40;
+
+            
+            if (tableTop > 700) {
+                doc.addPage();
+                tableTop = 50;
+            }
+        }
+
+
+        tableTop += 20;
+        doc.font('Helvetica-Bold');
+        doc.text('Shipping Address:', 50, tableTop);
+        doc.font('Helvetica');
+        doc.text(`${order.shippingAddress.addressLine1}`, 50, tableTop + 15);
+        doc.text(`${order.shippingAddress.addressLine2}`, 50, tableTop + 30);
+        doc.text(`${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.zipCode}`, 50, tableTop + 45);
+
+
+        const totalsTop = tableTop + 80;
+        doc.font('Helvetica-Bold');
+        doc.text('Subtotal:', 400, totalsTop);
+        doc.text(`$${(order.billTotal + order.discount).toFixed(2)}`, 500, totalsTop);
+
+        if (order.couponApplied) {
+            doc.text(`Discount (${order.couponCode}):`, 400, totalsTop + 20);
+            doc.text(`-$${order.discount.toFixed(2)}`, 500, totalsTop + 20);
+        }
+
+        doc.text('Shipping:', 400, totalsTop + 40);
+        doc.text(`$${order.shippingCharge.toFixed(2)}`, 500, totalsTop + 40);
+
+        doc.text('Total:', 400, totalsTop + 60);
+        doc.text(`$${order.billTotal.toFixed(2)}`, 500, totalsTop + 60);
+
+        doc.end();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to generate invoice' });
+    }
+};
 module.exports = {
     homepage,
     loadregister,
@@ -640,5 +742,6 @@ module.exports = {
     saveAddress,
     updateAddress,
     deleteAddress,
-    updateProfile
+    updateProfile,
+    generateInvoice
 }
