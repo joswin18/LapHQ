@@ -9,7 +9,7 @@ const Coupon = require('../model/couponModel');
 const validator = require('validator')
 const PDFDocument = require('pdfkit-table');
 const excel = require('excel4node');
-
+const Category = require('../model/categoryModel')
 const loadLogin = async(req,res)=>{
     try{
         return res.render('login')
@@ -47,7 +47,31 @@ const verifyLogin = async(req,res)=>{
 
 const loadDashboard = async(req,res)=>{
     try {
-        res.render('home')
+        const totalRevenue = await Order.aggregate([
+            { $match: { orderStatus: 'Delivered' } },
+            { $group: { _id: null, total: { $sum: '$billTotal' } } }
+        ]);
+
+        const totalOrders = await Order.countDocuments();
+        const totalProducts = await Product.countDocuments();
+        const categoryCount = await Category.countDocuments();
+
+        const orderData = await Order.aggregate([
+            { $group: {
+                _id: { $dateToString: { format: "%Y-%m-%d", date: "$orderDate" } },
+                count: { $sum: 1 },
+                revenue: { $sum: '$billTotal' }
+            }},
+            { $sort: { _id: 1 } }
+        ]);
+
+        res.render('home', {
+            totalRevenue: totalRevenue[0]?.total || 0,
+            totalOrders,
+            totalProducts,
+            categoryCount,
+            orderData: orderData 
+        });
     } catch (error) {
         console.log(error.message)
     }
@@ -100,7 +124,7 @@ let loadproductListing = async(req,res)=>{
     }
 }
 
-let Category = require('../model/categoryModel')
+
 // const { log } = require('console')
 
 let loadAddProducts = async(req,res)=>{

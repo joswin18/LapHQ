@@ -1,104 +1,100 @@
 (function ($) {
     "use strict";
 
-    /*Sale statistics Chart*/
-    if ($('#myChart').length) {
+    let chart;
+
+    function initChart() {
         var ctx = document.getElementById('myChart').getContext('2d');
-        var chart = new Chart(ctx, {
-            // The type of chart we want to create
-            type: 'line',
-            
-            // The data for our dataset
-            data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                datasets: [{
-                        label: 'Sales',
-                        tension: 0.3,
-                        fill: true,
-                        backgroundColor: 'rgba(44, 120, 220, 0.2)',
-                        borderColor: 'rgba(44, 120, 220)',
-                        data: [18, 17, 4, 3, 2, 20, 25, 31, 25, 22, 20, 9]
-                    },
-                    {
-                        label: 'Visitors',
-                        tension: 0.3,
-                        fill: true,
-                        backgroundColor: 'rgba(4, 209, 130, 0.2)',
-                        borderColor: 'rgb(4, 209, 130)',
-                        data: [40, 20, 17, 9, 23, 35, 39, 30, 34, 25, 27, 17]
-                    },
-                    {
-                        label: 'Products',
-                        tension: 0.3,
-                        fill: true,
-                        backgroundColor: 'rgba(380, 200, 230, 0.2)',
-                        borderColor: 'rgb(380, 200, 230)',
-                        data: [30, 10, 27, 19, 33, 15, 19, 20, 24, 15, 37, 6]
-                    }
-
-                ]
-            },
-            options: {
-                plugins: {
-                legend: {
-                    labels: {
-                    usePointStyle: true,
-                    },
-                }
-                }
-            }
-        });
-    } //End if
-
-    /*Sale statistics Chart*/
-    if ($('#myChart2').length) {
-        var ctx = document.getElementById("myChart2");
-        var myChart = new Chart(ctx, {
+        chart = new Chart(ctx, {
             type: 'bar',
             data: {
-            labels: ["900", "1200", "1400", "1600"],
-            datasets: [
-                {
-                    label: "US",
-                    backgroundColor: "#5897fb",
-                    barThickness:10,
-                    data: [233,321,783,900]
-                }, 
-                {
-                    label: "Europe",
-                    backgroundColor: "#7bcf86",
-                    barThickness:10,
-                    data: [408,547,675,734]
+                labels: [],
+                datasets: [{
+                    label: 'Orders',
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                    borderColor: 'rgba(44, 120, 220)',
+                    data: []
                 },
                 {
-                    label: "Asian",
-                    backgroundColor: "#ff9076",
-                    barThickness:10,
-                    data: [208,447,575,634]
-                },
-                {
-                    label: "Africa",
-                    backgroundColor: "#d595e5",
-                    barThickness:10,
-                    data: [123,345,122,302]
-                },
-            ]
+                    label: 'Revenue',
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(4, 209, 130, 0.2)',
+                    borderColor: 'rgb(4, 209, 130)',
+                    data: []
+                }]
             },
             options: {
                 plugins: {
                     legend: {
                         labels: {
-                        usePointStyle: true,
+                            usePointStyle: true,
                         },
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
                     }
                 }
             }
         });
-    } //end if
-    
+    }
+
+    function updateChartData(filter) {
+        let labels = [], orderCounts = [], revenues = [];
+
+        switch(filter) {
+            case 'yearly':
+                orderData.forEach(data => {
+                    let year = data._id.split('-')[0];
+                    let yearIndex = labels.indexOf(year);
+                    if (yearIndex === -1) {
+                        labels.push(year);
+                        orderCounts.push(data.count);
+                        revenues.push(data.revenue);
+                    } else {
+                        orderCounts[yearIndex] += data.count;
+                        revenues[yearIndex] += data.revenue;
+                    }
+                });
+                break;
+            case 'monthly':
+                orderData.forEach(data => {
+                    let yearMonth = data._id.substring(0, 7);
+                    let monthIndex = labels.indexOf(yearMonth);
+                    if (monthIndex === -1) {
+                        labels.push(yearMonth);
+                        orderCounts.push(data.count);
+                        revenues.push(data.revenue);
+                    } else {
+                        orderCounts[monthIndex] += data.count;
+                        revenues[monthIndex] += data.revenue;
+                    }
+                });
+                break;
+            case 'weekly':
+                
+                orderData.slice(-7).forEach(data => {
+                    labels.push(data._id);
+                    orderCounts.push(data.count);
+                    revenues.push(data.revenue);
+                });
+                break;
+        }
+
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = orderCounts;
+        chart.data.datasets[1].data = revenues;
+        chart.update();
+    }
+
+    $(document).ready(function() {
+        if ($('#myChart').length) {
+            initChart();
+            updateChartData('yearly'); 
+
+            $('#chartFilter').on('change', function() {
+                updateChartData(this.value);
+            });
+        }
+    });
+
 })(jQuery);

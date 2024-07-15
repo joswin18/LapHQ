@@ -544,10 +544,8 @@ let changePassword = async (req, res) => {
             zipCode:zipCode
         });
 
-        // Save the address
         let savedAddress = await address.save();
 
-        // Update the user's addresses
         userData.addresses.push(savedAddress._id);
         await userData.save();
 
@@ -565,7 +563,6 @@ const updateAddress = async (req, res) => {
         const addressId = req.params.addressId;
         const { addressType, addressLine1, addressLine2, city, state, zipCode } = req.body;
 
-        // Update the address in the database
         const updatedAddress = await Address.findByIdAndUpdate(
             addressId,
             { addressType, addressLine1, addressLine2, city, state, zipCode },
@@ -584,7 +581,6 @@ const deleteAddress = async (req, res) => {
     try {
         const addressId = req.params.addressId;
 
-        // Delete the address from the database
         await Address.findByIdAndDelete(addressId);
 
         res.status(200).json({ message: 'Address deleted successfully' });

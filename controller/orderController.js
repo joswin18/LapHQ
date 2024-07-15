@@ -361,7 +361,6 @@ const returnProduct = async(req,res)=>{
             return res.status(400).json({ success: false, message: 'Only delivered orders can be returned' });
         }
 
-        // for 7 days check
         const deliveryDate = new Date(order.updatedAt); 
         const currentDate = new Date();
         const daysSinceDelivery = (currentDate - deliveryDate) / (1000 * 60 * 60 * 24);
