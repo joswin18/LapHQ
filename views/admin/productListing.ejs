@@ -37,7 +37,7 @@
                         <option>2 in 1 Laptops</option>
                     </select>
                 </div> -->
-                <div class="col-md-2 col-6">
+                <!-- <div class="col-md-2 col-6">
                     <input type="date" value="02.05.2022" class="form-control">
                 </div>
                 <div class="col-md-2 col-6">
@@ -47,7 +47,7 @@
                         <option>Disabled</option>
                         <option>Show all</option>
                     </select>
-                </div>
+                </div> -->
             </div>
             <div >
                 <% 
@@ -108,17 +108,16 @@
         </div> <!-- card-body end// -->
     </div> <!-- card end// -->
     <div class="pagination-area mt-30 mb-50">
-        <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-start">
-                <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                <li class="page-item"><a class="page-link" href="#">02</a></li>
-                <li class="page-item"><a class="page-link" href="#">03</a></li>
-                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                <li class="page-item"><a class="page-link" href="#">16</a></li>
-                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
-            </ul>
-        </nav>
-    </div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-start">
+            <% for(let i = 1; i <= totalPages; i++) { %>
+                <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                    <a class="page-link" href="/admin/productListing?page=<%= i %>&filter=<%= currentFilter %>"><%= i %></a>
+                </li>
+            <% } %>            
+        </ul>
+    </nav>
+</div>
 
     <div class="card mb-4">
         <header class="card-header">
@@ -165,7 +164,7 @@
 <script>
 document.getElementById('filterOption').addEventListener('change', function() {
     let selectedOption = this.value;
-    window.location.href = '/admin/productListing?filter=' + selectedOption;
+    window.location.href = '/admin/productListing?filter=' + selectedOption + '&page=1';
 });
 </script>
 

@@ -15,117 +15,34 @@
     <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/theme/favicon.svg">
     <!-- Template CSS -->
     <link rel="stylesheet" href="assets/css/main.css?v=3.4">
+
+    <style>
+        .search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    z-index: 1000;
+    display: none;
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+    </style>
 </head>
 
 <body>
     <!-- Quick view -->
-    <div class="modal fade custom-modal" id="quickViewModal" tabindex="-1" aria-labelledby="quickViewModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">              
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>       
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 col-sm-12 col-xs-12">
-                            <div class="detail-gallery">
-                                <span class="zoom-icon"><i class="fi-rs-search"></i></span>
-                                <!-- MAIN SLIDES -->
-                                <div class="product-image-slider">
-                                    <figure class="border-radius-10">
-                                        <img src="productImages/image1.webp" alt="product image">
-                                    </figure>
-                                    <figure class="border-radius-10">
-                                        <img src="productImages/image1.webp" alt="product image">
-                                    </figure>
-                                    <figure class="border-radius-10">
-                                        <img src="productImages/image1.webp" alt="product image">
-                                    </figure>
-                                </div>
-                                <!-- THUMBNAILS -->
-                                <div class="slider-nav-thumbnails pl-15 pr-15">
-                                    <div><img src="productImages/image1.webp" alt="product image"></div>
-                                    <div><img src="productImages/image1.webp" alt="product image"></div>
-                                    <div><img src="productImages/image1.webp" alt="product image"></div>
-                                </div>
-                            </div>
-                            <!-- End Gallery -->
-                            <div class="social-icons single-share">
-                                <ul class="text-grey-5 d-inline-block">
-                                    <li><strong class="mr-10">Share this:</strong></li>
-                                    <li class="social-facebook"><a href="#"><img src="assets/imgs/theme/icons/icon-facebook.svg" alt=""></a></li>
-                                    <li class="social-twitter"><a href="#"><img src="assets/imgs/theme/icons/icon-twitter.svg" alt=""></a></li>
-                                    <li class="social-instagram"><a href="#"><img src="assets/imgs/theme/icons/icon-instagram.svg" alt=""></a></li>
-                                    <li class="social-linkedin"><a href="#"><img src="assets/imgs/theme/icons/icon-pinterest.svg" alt=""></a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-sm-12 col-xs-12">
-                            <div class="detail-info">
-                                <h3 class="title-detail mt-30">High-Performance Laptop HD450</h3>
-                                <div class="product-detail-rating">
-                                    <div class="pro-details-brand">
-                                        <span> Brand: <a href="shop-grid-right.html">TechBrand</a></span>
-                                    </div>
-                                    <div class="product-rate-cover text-end">
-                                        <div class="product-rate d-inline-block">
-                                            <div class="product-rating" style="width:90%"></div>
-                                        </div>
-                                        <span class="font-small ml-5 text-muted"> (25 reviews)</span>
-                                    </div>
-                                </div>
-                                <div class="clearfix product-price-cover">
-                                    <div class="product-price primary-color float-left">
-                                        <ins><span class="text-brand">$1200.00</span></ins>
-                                        <ins><span class="old-price font-md ml-15">$1500.00</span></ins>
-                                        <span class="save-price font-md color3 ml-15">20% Off</span>
-                                    </div>
-                                </div>
-                                <div class="bt-1 border-color-1 mt-15 mb-15"></div>
-                                <div class="short-desc mb-30">
-                                    <p class="font-sm">Experience high performance and stunning visuals with this cutting-edge laptop, featuring the latest processor and graphics technology.</p>
-                                </div>
-                                
-                                <!-- <div class="attr-detail attr-color mb-15">
-                                    <strong class="mr-10">Color</strong>
-                                    <ul class="list-filter color-filter">
-                                        <li><a href="#" data-color="Silver"><span class="product-color-silver"></span></a></li>
-                                        <li class="active"><a href="#" data-color="Black"><span class="product-color-black"></span></a></li>
-                                        <li><a href="#" data-color="Gray"><span class="product-color-gray"></span></a></li>
-                                    </ul>
-                                </div> -->
-                                <div class="attr-detail attr-size">
-                                    <strong class="mr-10">Size</strong>
-                                    <ul class="list-filter size-filter font-small">
-                                        <li><a href="#">13"</a></li>
-                                        <li class="active"><a href="#">15"</a></li>
-                                        <li><a href="#">17"</a></li>
-                                    </ul>
-                                </div>
-                                <div class="bt-1 border-color-1 mt-30 mb-30"></div>
-                                <div class="detail-extralink">
-                                    <div class="detail-qty border radius">
-                                        <a href="#" class="qty-down"><i class="fi-rs-angle-small-down"></i></a>
-                                        <span class="qty-val">1</span>
-                                        <a href="#" class="qty-up"><i class="fi-rs-angle-small-up"></i></a>
-                                    </div>
-                                    <div class="product-extra-link2">
-                                        <button type="submit" class="button button-add-to-cart">Add to cart</button>
-                                        <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
-                                        <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
-                                    </div>
-                                </div>
-                                <ul class="product-meta font-xs color-grey mt-50">
-                                    <li class="mb-5">SKU: <a href="#">LPT12345</a></li>
-                                    <li class="mb-5">Tags: <a href="#" rel="tag">Laptop</a>, <a href="#" rel="tag">Tech</a>, <a href="#" rel="tag">Electronics</a></li>
-                                    <li>Availability:<span class="in-stock text-success ml-5">10 Items In Stock</span></li>
-                                </ul>
-                            </div>
-                            <!-- Detail Info -->
-                        </div>
-                    </div>
-                </div>        
-            </div>
-        </div>
-    </div>
+    
     
     <header class="header-area header-style-4 header-height-2">
         <div class="header-top header-top-ptb-1 d-none d-lg-block">
@@ -134,8 +51,8 @@
                     <div class="col-xl-3 col-lg-4">
                         <div class="header-info">
                             <ul>
-                                <li><i class="fi-rs-smartphone"></i> <a href="#">(+01) - 2345 - 6789</a></li>
-                                <li><i class="fi-rs-marker"></i><a  href="page-contact.html">Our location</a></li>
+                                <!-- <li><i class="fi-rs-smartphone"></i> <a href="#">(+01) - 2345 - 6789</a></li> -->
+                                <li><i class="fi-rs-marker"></i><a  href="/contactPage">Contact Us</a></li>
                             </ul>
                         </div>
                     </div>
@@ -143,9 +60,9 @@
                         <div class="text-center">
                             <div id="news-flash" class="d-inline-block">
                                 <ul>
-                                    <li>Get great devices up to 50% off <a href="shop-grid-right.html">View details</a></li>
+                                    <li>Get great devices up to 50% off <a href="/shop">View details</a></li>
                                     <li>Supper Value Deals - Save more with coupons</li>
-                                    <li>Trendy 25silver jewelry, save up 35% off today <a href="shop-grid-right.html">Shop now</a></li>
+                                    <li>Trending Offers on Laptops <a href="/shop">Shop now</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -204,7 +121,7 @@
                     </div>
                     <div class="header-right">
                         <div class="search-style-2">
-                            <form action="#">
+                            <form action="#" id="searchForm">
                                 <!-- <select class="select-active">
                                     <option>All Categories</option>
                                     <option>Women's</option>
@@ -218,7 +135,9 @@
                                     <option>Shoes</option>
                                     <option>Mother & Kids</option>
                                 </select> -->
-                                <input type="text" placeholder="Search for items...">
+                                <input type="text" placeholder="Search for items..." id="searchInput" autocomplete="off">
+                                <button type="submit"><i class="fi-rs-search"></i></button>
+                                <div id="searchSuggestions" class="search-suggestions"></div>
                             </form>
                         </div>
                         <div class="header-action-right">
@@ -226,13 +145,13 @@
                                 <div class="header-action-icon-2">
                                     <a href="/wishlist">
                                         <img class="svgInject" alt="Evara" src="assets/imgs/theme/icons/icon-heart.svg">
-                                        <span class="pro-count blue">4</span>
+                                        <!-- <span class="pro-count blue">4</span> -->
                                     </a>
                                 </div>
                                 <div class="header-action-icon-2">
                                     <a class="mini-cart-icon" href="/cart">
                                         <img alt="Evara" src="assets/imgs/theme/icons/icon-cart.svg">
-                                        <span class="pro-count blue">2</span>
+                                        <!-- <span class="pro-count blue">2</span> -->
                                     </a>
                                     
                                 </div>
@@ -366,13 +285,13 @@
                             <div class="header-action-icon-2">
                                 <a href="shop-wishlist.html">
                                     <img alt="Evara" src="assets/imgs/theme/icons/icon-heart.svg">
-                                    <span class="pro-count white">4</span>
+                                    <!-- <span class="pro-count white">4</span> -->
                                 </a>
                             </div>
                             <div class="header-action-icon-2">
                                 <a class="mini-cart-icon" href="/cart">
                                     <img alt="Evara" src="assets/imgs/theme/icons/icon-cart.svg">
-                                    <span class="pro-count white">2</span>
+                                    <!-- <span class="pro-count white">2</span> -->
                                 </a>
                                 <div class="cart-dropdown-wrap cart-dropdown-hm2">
                                     <ul>
@@ -522,3 +441,55 @@
             </div>
         </div>
     </div>
+
+    <script>
+        
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchSuggestions = document.getElementById('searchSuggestions');
+    const searchForm = document.getElementById('searchForm');
+
+    let debounceTimer;
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            const query = this.value.trim();
+            if (query.length > 2) {
+                fetch(`/search?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(products => {
+                        searchSuggestions.innerHTML = '';
+                        products.forEach(product => {
+                            const div = document.createElement('div');
+                            div.className = 'suggestion-item';
+                            div.textContent = product.name;
+                            div.addEventListener('click', () => {
+                                window.location.href = `/productDetails?id=${product._id}`;
+                            });
+                            searchSuggestions.appendChild(div);
+                        });
+                        searchSuggestions.style.display = products.length ? 'block' : 'none';
+                    })
+                    .catch(error => console.error('Error:', error));
+            } else {
+                searchSuggestions.style.display = 'none';
+            }
+        }, 300);
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!searchSuggestions.contains(e.target) && e.target !== searchInput) {
+            searchSuggestions.style.display = 'none';
+        }
+    });
+
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const query = searchInput.value.trim();
+        if (query) {
+            window.location.href = `/shop?search=${encodeURIComponent(query)}`;
+        }
+    });
+});
+    </script>

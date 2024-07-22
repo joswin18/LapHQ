@@ -147,8 +147,19 @@ const logout = async(req,res)=>{
 
 const loadUserList = async(req,res)=>{
     try {
-        let usersData = await User.find({is_admin:0})
-        res.render('userList',{users:usersData})
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10; // Number of users per page
+        const skip = (page - 1) * limit;
+
+        const totalUsers = await User.countDocuments({ is_admin: 0 });
+        const totalPages = Math.ceil(totalUsers / limit);
+
+        let usersData = await User.find({ is_admin: 0 })
+            .skip(skip)
+            .limit(limit);
+
+        
+        res.render('userList',{users:usersData,currentPage:page,totalPages:totalPages})
     } catch (error) {
         console.log(error.message)
     }
@@ -159,24 +170,35 @@ let loadproductListing = async(req,res)=>{
         let filter = req.query.filter || 'default';
 
         // let productData = await Product.find({isDeleted: false})
-        let productData;
+        let page = parseInt(req.query.page) || 1;
+        let limit = 10;
 
-        let deletedProducts = await Product.find({isDeleted: true})
+        let query = {isDeleted: false};
+        let sort = {};
 
         switch(filter) {
             case 'newArrivals':
-                productData = await Product.find({isDeleted: false}).sort({createdAt: -1});
+                sort = {createdAt: -1};
                 break;
             case 'aAtoZZ':
-                productData = await Product.find({isDeleted: false}).collation({locale: 'en', strength: 2}).sort({name: 1});
+                sort = {name: 1};
                 break;
             case 'zZtoAA':
-                productData = await Product.find({isDeleted: false}).collation({locale: 'en', strength: 2}).sort({name: -1});
+                sort = {name: -1};
                 break;
-            default:
-                productData = await Product.find({isDeleted: false});
         }
-        res.render('productListing',{products:productData, deletedProducts:deletedProducts , currentFilter:filter})
+
+        let totalProducts = await Product.countDocuments(query);
+        let totalPages = Math.ceil(totalProducts / limit);
+
+        let productData = await Product.find(query)
+            .sort(sort)
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .collation({locale: 'en', strength: 2});
+
+        let deletedProducts = await Product.find({isDeleted: true});
+        res.render('productListing',{products:productData, deletedProducts:deletedProducts , currentFilter:filter, currentPage:page,totalPages:totalPages})
     } catch (error) {
         console.log(error.message)
     }
@@ -574,12 +596,22 @@ let loadOrderManagement = async(req,res)=>{
     try {
         // let order = await Order.findById({userId:userData._id})
 
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10; // Number of orders per page
+        const skip = (page - 1) * limit;
+
+        const totalOrders = await Order.countDocuments();
+        const totalPages = Math.ceil(totalOrders / limit);
+
         let orderData = await Order.find({})
             .populate('user')
             .populate('shippingAddress')
             .populate('items.product')
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
-        res.render('orderManagement',{orderData})
+        res.render('orderManagement',{orderData,currentPage:page,totalPages:totalPages})
     } catch (error) {
         console.log(error.message)
     }

@@ -92,4 +92,6 @@ userRoute.get('/get-order-details/:orderId',auth.is_login,orderController.search
 userRoute.post('/return-order',orderController.returnProduct)
 
 userRoute.get('/generate-invoice/:orderId',userController.generateInvoice)
+
+userRoute.get('/search',userController.searchProducts)
 module.exports = userRoute;

@@ -6,7 +6,7 @@
     function initChart() {
         var ctx = document.getElementById('myChart').getContext('2d');
         chart = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: [],
                 datasets: [{

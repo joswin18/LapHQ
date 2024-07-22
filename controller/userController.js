@@ -283,10 +283,14 @@ let loadShop = async(req,res)=>{
         const limit = parseInt(req.query.limit) || 12;
         const sort = req.query.sort || 'featured';
         const category = req.query.category || '';
+        const search = req.query.search || '';
 
         let query = { isDeleted: false };
         if (category) {
             query.category = category;
+        }
+        if (search) {
+            query.name = { $regex: search, $options: 'i' };
         }
 
         let sortOption = {};
@@ -780,6 +784,21 @@ const generateInvoice = async (req, res) => {
         res.status(500).json({ error: 'Failed to generate invoice' });
     }
 };
+
+const searchProducts = async (req, res) => {
+    try {
+        const query = req.query.q;
+        const products = await Product.find(
+            { name: { $regex: query, $options: 'i' }, isDeleted: false },
+            'name _id'
+        ).limit(5);
+        res.json(products);
+    } catch (error) {
+        console.error('Search error:', error);
+        res.status(500).json({ error: 'An error occurred while searching' });
+    }
+};
+
 module.exports = {
     homepage,
     loadregister,
@@ -805,5 +824,6 @@ module.exports = {
     updateAddress,
     deleteAddress,
     updateProfile,
-    generateInvoice
+    generateInvoice,
+    searchProducts
 }

@@ -3,8 +3,18 @@ const Cart = require('../model/cartModel');
 
 let loadCouponManagement = async(req,res)=>{
     try {
-        const coupons = await Coupon.find();
-            res.render('couponManagement', { coupons });
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const skip = (page - 1) * limit;
+
+        const totalCoupons = await Coupon.countDocuments();
+        const totalPages = Math.ceil(totalCoupons / limit);
+
+        let coupons = await Coupon.find({})
+            .skip(skip)
+            .limit(limit);
+
+            res.render('couponManagement', { coupons,currentPage:page,totalPages:totalPages});
     } catch (error) {
         console.log(error.message)
     }
