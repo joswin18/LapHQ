@@ -56,10 +56,10 @@
                     <div class="widget-category mb-30">
                         <h5 class="section-title style-1 mb-30 wow fadeIn animated">Categories</h5>
                         <ul class="categories">
-                            <li><a href="shop-grid-right.html">Ultrabooks</a></li>
-                            <li><a href="shop-grid-right.html">Gaming Laptops</a></li>
-                            <li><a href="shop-grid-right.html">Business Laptops</a></li>
-                            <li><a href="shop-grid-right.html">Student Laptops</a></li>
+                            <% for( let i = 0; i < categories.length; i++ ) { %>
+                                <li><a href="/shop?category=<%=categories[i].name%>&sort=featured&page=1"><%= categories[i].name %></a></li>
+                            <% } %>                           
+                            
                         </ul>
                     </div>
                 </div>
@@ -133,7 +133,7 @@
                                             <div class="product-img-action-wrap">
                                                 <div class="product-img product-img-zoom">
                                                     <a href="/productDetails/<%= product._id %>">
-                                                        <img class="default-img" src="/productImages/<%= product.defaultImg %>" alt="">
+                                                        <img class="default-img" src="/productImages/<%= product.defaultImg[0] %>" alt="">
                                                         <img class="hover-img" src="/productImages/<%= product.hoverImg %>" alt="">
                                                     </a>
                                                 </div>
@@ -153,7 +153,7 @@
                                                 <h2><a href="/productDetails/<%= product._id %>"><%= product.name %></a></h2>
                                                 <div class="rating-result" title="95%">
                                                     <span>
-                                                        <span>95%</span>
+                                                        <span><%= product.discountPercentage %>%</span>
                                                     </span>
                                                 </div>
                                                 <div class="product-price">

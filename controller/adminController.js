@@ -65,12 +65,70 @@ const loadDashboard = async(req,res)=>{
             { $sort: { _id: 1 } }
         ]);
 
+        const bestSellingProducts = await Order.aggregate([
+            { $unwind: "$items" },
+            { $group: {
+                _id: "$items.product",
+                totalQuantity: { $sum: "$items.quantity" }
+            }},
+            { $sort: { totalQuantity: -1 } },
+            { $limit: 10 },
+            { $lookup: {
+                from: "products",
+                localField: "_id",
+                foreignField: "_id",
+                as: "productDetails"
+            }},
+            { $unwind: "$productDetails" },
+            { $project: {
+                name: "$productDetails.name",
+                totalQuantity: 1
+            }}
+        ]);
+
+        const bestSellingCategories = await Order.aggregate([
+            { $unwind: "$items" },
+            { $lookup: {
+                from: "products",
+                localField: "items.product",
+                foreignField: "_id",
+                as: "product"
+            }},
+            { $unwind: "$product" },
+            { $group: {
+                _id: "$product.category",
+                totalQuantity: { $sum: "$items.quantity" }
+            }},
+            { $sort: { totalQuantity: -1 } },
+            { $limit: 10 }
+        ]);
+
+        const bestSellingBrands = await Order.aggregate([
+            { $unwind: "$items" },
+            { $lookup: {
+                from: "products",
+                localField: "items.product",
+                foreignField: "_id",
+                as: "product"
+            }},
+            { $unwind: "$product" },
+            { $group: {
+                _id: "$product.brandName",
+                totalQuantity: { $sum: "$items.quantity" }
+            }},
+            { $sort: { totalQuantity: -1 } },
+            { $limit: 10 }
+        ]);
+
         res.render('home', {
             totalRevenue: totalRevenue[0]?.total || 0,
             totalOrders,
             totalProducts,
             categoryCount,
-            orderData: orderData 
+            orderData: orderData,
+            bestSellingProducts,
+            bestSellingCategories,
+            bestSellingBrands
         });
     } catch (error) {
         console.log(error.message)

@@ -79,6 +79,92 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Best Selling Products (Top 10)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Product Name</th>
+                                    <th scope="col">Total Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% bestSellingProducts.forEach((product, index) => { %>
+                                    <tr>
+                                        <th scope="row"><%= index + 1 %></th>
+                                        <td><%= product.name %></td>
+                                        <td><%= product.totalQuantity %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Best Selling Categories (Top 10)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Category Name</th>
+                                    <th scope="col">Total Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% bestSellingCategories.forEach((category, index) => { %>
+                                    <tr>
+                                        <th scope="row"><%= index + 1 %></th>
+                                        <td><%= category._id %></td>
+                                        <td><%= category.totalQuantity %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Best Selling Brands (Top 10)</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Brand Name</th>
+                                    <th scope="col">Total Quantity Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% bestSellingBrands.forEach((brand, index) => { %>
+                                    <tr>
+                                        <th scope="row"><%= index + 1 %></th>
+                                        <td><%= brand._id %></td>
+                                        <td><%= brand.totalQuantity %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- <div class="pagination-area mt-30 mb-50">
         <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-start">

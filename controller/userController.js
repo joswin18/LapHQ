@@ -12,7 +12,7 @@ const Wallet = require('../model/walletModel');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
-
+const category = require('../model/categoryModel')
 
 
 let securePassword = async(password)=>{
@@ -85,8 +85,9 @@ let homepage = async(req,res)=>{
     try{
         // let userName = await User.findOne({name:name})
         const featuredProducts = await Product.find({ isDeleted:false });
-        const bestSellers = await Product.find({ isBestSeller: true });
-        
+        // const bestSellers = await Product.find({ isBestSeller: true });
+        let categories = await category.find({deleted:false})
+
         const calculateDiscount = (price, oldPrice) => {
             return ((oldPrice - price) / oldPrice * 100).toFixed(2);
         };
@@ -96,8 +97,32 @@ let homepage = async(req,res)=>{
             return { ...product._doc, discountPercentage };
         });
 
+        const bestSellingProducts = await Order.aggregate([
+            { $unwind: "$items" },
+            { $group: {
+                _id: "$items.product",
+                totalQuantity: { $sum: "$items.quantity" }
+            }},
+            { $sort: { totalQuantity: -1 } },
+            { $limit: 10 }
+        ]);
+
+        const bestSellingProductDetails = await Product.find({
+            _id: { $in: bestSellingProducts.map(item => item._id) }
+        });
+        
+        const bestSellingProductsWithDiscount = bestSellingProductDetails.map(product => {
+            const discountPercentage = calculateDiscount(product.price, product.oldPrice);
+            const quantityData = bestSellingProducts.find(item => item._id.toString() === product._id.toString());
+            return { 
+                ...product._doc, 
+                discountPercentage,
+                totalQuantitySold: quantityData ? quantityData.totalQuantity : 0
+            };
+        });
+
         let userDataName = req.body.name;
-        let result = await res.render('home',{req:req,userDataName,featuredProducts:featuredProductsWithDiscount,bestSellers});
+        let result = await res.render('home',{req:req,userDataName,featuredProducts:featuredProductsWithDiscount,bestSellers:bestSellingProductsWithDiscount,categories});
         return result;
     }catch(err){
         console.log("error",err);
@@ -254,19 +279,60 @@ let userLogout = async(req,res)=>{
 
 let loadShop = async(req,res)=>{
     try{
-        const featuredProducts = await Product.find({ isDeleted:false });
-        const bestSellers = await Product.find({ isBestSeller: true });
-        
+       const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+        const sort = req.query.sort || 'featured';
+        const category = req.query.category || '';
+
+        let query = { isDeleted: false };
+        if (category) {
+            query.category = category;
+        }
+
+        let sortOption = {};
+        switch (sort) {
+            case 'price_asc':
+                sortOption = { price: 1 };
+                break;
+            case 'price_desc':
+                sortOption = { price: -1 };
+                break;
+            case 'newest':
+                sortOption = { createdAt: -1 };
+                break;
+            default:
+                sortOption = { isFeatured: -1 };
+        }
+
+        const totalProducts = await Product.countDocuments(query);
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        const products = await Product.find(query)
+            .sort(sortOption)
+            .skip((page - 1) * limit)
+            .limit(limit);
+
+        const categories = await Product.distinct('category');
+
         const calculateDiscount = (price, oldPrice) => {
             return ((oldPrice - price) / oldPrice * 100).toFixed(2);
         };
 
-        const featuredProductsWithDiscount = featuredProducts.map(product => {
+        const productsWithDiscount = products.map(product => {
             const discountPercentage = calculateDiscount(product.price, product.oldPrice);
             return { ...product._doc, discountPercentage };
         });
 
-        res.render('shopPage',{req:req,featuredProducts:featuredProductsWithDiscount,bestSellers})
+        res.render('shopPage', {
+            req: req,
+            products: productsWithDiscount,
+            currentPage: page,
+            totalPages: totalPages,
+            sort: sort,
+            category: category,
+            categories: categories,
+            limit: limit
+        });
     }catch(error){
         console.log(error.message)
     }
