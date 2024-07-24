@@ -94,7 +94,7 @@
                                             </div>
                                             <div class="product-extra-link2">
                                                 <button type="submit" class="button button-add-to-cart" id="addToCartBtn">Add to cart</button>
-                                                <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                                <a aria-label="Add To Wishlist" class="action-btn hover-up" onclick="addToWishlist('<%= product._id %>')"><i class="fi-rs-heart"></i></a>
                                                 <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                             </div>
                                     </div>
@@ -241,11 +241,41 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    function checkUserLoggedIn(callback) {
+    fetch('/check-auth')
+        .then(response => response.json())
+        .then(data => {
+            callback(data.isLoggedIn);
+        })
+        .catch(error => {
+            console.error('Error checking auth status:', error);
+            callback(false);
+        });
+}
+
+function showLoginAlert() {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Login Required',
+        text: 'Please log in to perform this action.',
+        showCancelButton: true,
+        confirmButtonText: 'Login',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/login';
+        }
+    });
+}
 document.getElementById('addToCartBtn').addEventListener('click', function() {
     const productId = '<%= product._id %>';
     const quantity = document.querySelector('.qty-val').textContent;
-
-    fetch('/add-to-cart', {
+    checkUserLoggedIn((isLoggedIn) => {
+        if (!isLoggedIn) {
+            showLoginAlert();
+            return;
+        }
+        fetch('/add-to-cart', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -277,10 +307,12 @@ document.getElementById('addToCartBtn').addEventListener('click', function() {
                 text: 'Something went wrong!',
             });
         });
+    });
+    
+    
    
 });
 
-// Quantity increment/decrement logic
 const qtyButtons = document.querySelectorAll('.qty-up, .qty-down');
 
 qtyButtons.forEach(button => {
@@ -293,8 +325,6 @@ qtyButtons.forEach(button => {
 });
 
 function updateQuantity(productId, isIncrement) {
-    // Implement the logic to update the quantity in the product details page
-    // You can use the same logic as the cart page or modify it as per your requirements
     const qtyVal = document.querySelector('.qty-val');
     let quantity = parseInt(qtyVal.textContent);
 
@@ -307,6 +337,56 @@ function updateQuantity(productId, isIncrement) {
     }
 
     qtyVal.textContent = quantity;
+}
+
+function addToWishlist(productId) {
+        checkUserLoggedIn((isLoggedIn) => {
+        if (!isLoggedIn) {
+            showLoginAlert();
+            return;
+        }
+        fetch('/add-to-wishlist', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId: productId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Product Added to Wishlist',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        } else if (data.alreadyInWishlist) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Already in Wishlist',
+                text: 'This product is already in your wishlist.',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to add product to wishlist',
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'An error occurred while adding the product to wishlist',
+        });
+    });
+    });
+    
 }
 </script>
 

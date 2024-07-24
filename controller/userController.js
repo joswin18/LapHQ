@@ -799,6 +799,14 @@ const searchProducts = async (req, res) => {
     }
 };
 
+let loadContactPage = async(req,res)=>{
+    try {
+        res.render('contactPage',{req:req})
+    } catch (error) {
+        console.log(error.message)
+    }
+}
+
 module.exports = {
     homepage,
     loadregister,
@@ -825,5 +833,6 @@ module.exports = {
     deleteAddress,
     updateProfile,
     generateInvoice,
-    searchProducts
+    searchProducts,
+    loadContactPage
 }

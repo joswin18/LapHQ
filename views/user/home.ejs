@@ -181,8 +181,41 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
+function checkUserLoggedIn(callback) {
+    fetch('/check-auth')
+        .then(response => response.json())
+        .then(data => {
+            callback(data.isLoggedIn);
+        })
+        .catch(error => {
+            console.error('Error checking auth status:', error);
+            callback(false);
+        });
+}
+
+function showLoginAlert() {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Login Required',
+        text: 'Please log in to perform this action.',
+        showCancelButton: true,
+        confirmButtonText: 'Login',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/login';
+        }
+    });
+}
+
     function addToWishlist(productId) {
-    fetch('/add-to-wishlist', {
+        checkUserLoggedIn((isLoggedIn) => {
+        if (!isLoggedIn) {
+            showLoginAlert();
+            return;
+        }
+        fetch('/add-to-wishlist', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -222,9 +255,16 @@
             text: 'An error occurred while adding the product to wishlist',
         });
     });
+    });
+    
 }
 
     function addToCart(productId) {
+        checkUserLoggedIn((isLoggedIn) => {
+        if (!isLoggedIn) {
+            showLoginAlert();
+            return;
+        }
         fetch('/add-to-cart', {
             method: 'POST',
             headers: {
@@ -259,6 +299,8 @@
                 text: 'Something went wrong!',
             });
         });
+    });
+        
     } 
 </script>
 

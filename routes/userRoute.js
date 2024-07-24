@@ -40,7 +40,7 @@ userRoute.post('/login',userController.verifyLogin);
 userRoute.get('/home',auth.is_login, userController.homepage);
 userRoute.get('/logout',userController.userLogout)
 
-userRoute.get('/shop',auth.is_login,userController.loadShop)
+userRoute.get('/shop',userController.loadShop)
 userRoute.get('/otp',auth.is_logout,userController.loadOtp)
 userRoute.post('/otp',auth.is_logout, userController.verifyOtp)
 userRoute.post('/resend-otp', userController.resendOtp)
@@ -62,7 +62,7 @@ userRoute.delete('/delete-address/:addressId',userController.deleteAddress)
 userRoute.post('/update-profile',userController.updateProfile)
 
 //products
-userRoute.get('/productDetails',auth.is_login,userController.productDetail)
+userRoute.get('/productDetails',userController.productDetail)
 userRoute.post('/add-to-cart',cartController.addToCart)
 userRoute.get('/cart',auth.is_login,cartController.loadCart)
 userRoute.post('/update-quantity',cartController.updateQuantity)
@@ -94,4 +94,9 @@ userRoute.post('/return-order',orderController.returnProduct)
 userRoute.get('/generate-invoice/:orderId',userController.generateInvoice)
 
 userRoute.get('/search',userController.searchProducts)
+userRoute.get('/contactPage',auth.is_login,userController.loadContactPage)
+
+userRoute.get('/check-auth', (req, res) => {
+    res.json({ isLoggedIn: !!req.session.user_id });
+});
 module.exports = userRoute;

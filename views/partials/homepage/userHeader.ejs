@@ -143,13 +143,21 @@
                         <div class="header-action-right">
                             <div class="header-action-2">
                                 <div class="header-action-icon-2">
-                                    <a href="/wishlist">
+                                    <% if (req.session.user_id) { %>
+                                        <a href="/wishlist">
+                                    <% } else { %>
+                                        <a href="#" onclick="showLoginError(event)">
+                                    <% } %>
                                         <img class="svgInject" alt="Evara" src="assets/imgs/theme/icons/icon-heart.svg">
                                         <!-- <span class="pro-count blue">4</span> -->
                                     </a>
                                 </div>
                                 <div class="header-action-icon-2">
-                                    <a class="mini-cart-icon" href="/cart">
+                                    <% if (req.session.user_id) { %>
+                                        <a class="mini-cart-icon" href="/cart">
+                                    <% } else { %>
+                                        <a class="mini-cart-icon" href="#" onclick="showLoginError(event)">
+                                    <% } %>
                                         <img alt="Evara" src="assets/imgs/theme/icons/icon-cart.svg">
                                         <!-- <span class="pro-count blue">2</span> -->
                                     </a>
@@ -444,6 +452,21 @@
 
     <script>
         
+        function showLoginError() {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Login Required',
+        text: 'Please log in to perform this action.',
+        showCancelButton: true,
+        confirmButtonText: 'Login',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/login';
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const searchSuggestions = document.getElementById('searchSuggestions');
