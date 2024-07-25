@@ -108,7 +108,8 @@ let homepage = async(req,res)=>{
         ]);
 
         const bestSellingProductDetails = await Product.find({
-            _id: { $in: bestSellingProducts.map(item => item._id) }
+            _id: { $in: bestSellingProducts.map(item => item._id) },
+            isDeleted:false
         });
         
         const bestSellingProductsWithDiscount = bestSellingProductDetails.map(product => {
