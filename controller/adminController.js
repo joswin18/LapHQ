@@ -251,6 +251,12 @@ let addProducts = async(req,res)=>{
             return res.render('addProduct', { error: 'Regular price should be a valid number greater than 0' ,categoryData:categoryData});
         }
 
+        let laptopValidation = await Product.findOne({name:name})
+        if (laptopValidation) {
+            let categoryData = await Product.find({ deleted: false })
+            return res.render('addProduct',{ error: 'product already exist',categoryData:categoryData });
+        }
+
     try {
         const images = [];
         // const hoverImage = req.files[0].filename;

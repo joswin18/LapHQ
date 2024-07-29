@@ -44,7 +44,7 @@
         switch(filter) {
             case 'yearly':
                 orderData.forEach(data => {
-                    let year = data._id.split('-')[0];
+                    let year = data._id.split('-')[0,1];
                     let yearIndex = labels.indexOf(year);
                     if (yearIndex === -1) {
                         labels.push(year);
