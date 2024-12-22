@@ -1,6 +1,7 @@
 # E-commerce Website
 
-An e-commerce platform built using **EJS**, **Express.js**, and **MongoDB**.
+An e-commerce platform built using **EJS**, **Express.js**, and **MongoDB**. <br>
+### check out [features](./features.md)
 
 ---
 
