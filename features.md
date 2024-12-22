@@ -17,4 +17,26 @@
 - **Online Payment**: Razorpay or PayPal integration for seamless transactions.  
 - **Invoice Download**: Generate and download invoices in PDF format.  
 
+### Admin Features
+- **Order Management**: View, update, and cancel orders with ease.  
+- **Inventory & Stock Management**: Monitor stock levels and update product availability.  
+- **Sales Report Generation**:  
+  - Filter sales by daily, weekly, yearly, or custom date ranges.  
+  - Display discounts and coupons applied.  
+  - Export reports in table format (PDF).  
+- **Offer Module**: Create and manage product, category, and referral offers.  
+- **Admin Dashboard**:  
+  - Visual charts with filters (yearly, monthly).  
+  - Top 10 best-selling products, categories, and brands.  
+- **Coupon Management**: Add, list, and apply discount coupons.  
+- **User Management**: Block or unblock users.  
 
+### Additional Features
+- **Image Management**:  
+  - Preview, crop, and delete images while adding products.  
+  - Image validation on frontend and backend.  
+- **Session Handling**: Robust session handling for improved security and usability.  
+- **Pagination & Sorting**: Implemented for product and order listings to improve performance.  
+- **Error Handling**: Centralized error handling middleware for seamless debugging.  
+- **Secure Environment**: All sensitive information (e.g., MongoDB URL, mail credentials) is stored in `.env` files.  
+- **Refactored Codebase**: Maintains clean, modular, and well-structured code with multiple branches for easy collaboration.  
